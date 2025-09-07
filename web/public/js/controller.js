@@ -100,6 +100,10 @@ socket.on("game:returnReset", async () => {
   handleGameReset();
 });
 
+socket.on("game:returnSpinButtonState", (data) => {
+  updateSpinButtonState(data.game);
+});
+
 ////////////////////////////////////////////////////
 //
 // Sección de funciones auxiliares para el socket
@@ -117,6 +121,8 @@ function handleReturnedData(data, socket) {
   if (game) {
     handleGameData(game);
   }
+
+  updateSpinButtonState(game);
 
   const currentPlayerPosition = game.currentPlayer;
   if (currentPlayerPosition) {
@@ -146,6 +152,14 @@ function handleReturnedData(data, socket) {
 
     if (iframeContainer) {
       iframeContainer.classList.add("shadow-glow", "scale-[1.04]");
+    }
+  } else {
+    spinButton.removeAttribute("disabled");
+    spinButton.textContent = "Spin!";
+    turnButton.setAttribute("disabled", true);
+    const currentHighlightedCard = document.querySelector(".shadow-glow .scale-\\[1\\.04\\]");
+    if (currentHighlightedCard) {
+      currentHighlightedCard.classList.remove("shadow-glow", "scale-[1.04]");
     }
   }
 }
@@ -234,10 +248,9 @@ function handleGameData(game) {
   document.getElementById("roundNumber").textContent = game.currentRound;
   document.getElementById("totalRounds").textContent = game.totalRounds;
 
-  if (game.remainingImages.length === "0") {
-    spinButton.setAttribute("disabled", true);
-    spinButton.textContent = "Reset";
+  if (game.remainingImages.length === 0 || game.currentRound >= game.totalRounds) {
     spinButton.setAttribute("disabled", false);
+    spinButton.textContent = "Reset";
   }
 
   const currentPlayer = game.currentPlayer;
@@ -248,6 +261,26 @@ function handleGameData(game) {
     if (currentHighlightedCard) {
       currentHighlightedCard.classList.remove("shadow-glow", "scale-[1.04]");
     }
+  }
+}
+
+function updateSpinButtonState(game) {
+  if (!game) return;
+  if (game.remainingImages.length === 0 || game.currentRound >= game.totalRounds) {
+    spinButton.textContent = "Reset";
+    spinButton.removeAttribute("disabled");
+  } else if (!game.currentPlayer) {
+    spinButton.textContent = "Spin!";
+    spinButton.removeAttribute("disabled");
+    turnButton.setAttribute("disabled", true);
+  } else if (game.assignedScores.length === 0) {
+    spinButton.setAttribute("disabled", true);
+  } else if (game.assignedScores.length === 1) {
+    spinButton.textContent = "Reveal!";
+    spinButton.removeAttribute("disabled");
+  } else {
+    spinButton.textContent = "Spin!";
+    spinButton.removeAttribute("disabled");
   }
 }
 
@@ -385,7 +418,7 @@ async function spinContainer(cardContainerNumber, cardContainer, reelData) {
     initialImage.style.position = "absolute";
 
     const interval = setInterval(() => {
-      currentPosition += imageHeight / 8; 
+      currentPosition += imageHeight / 8;
       if (currentPosition >= totalHeight) {
         currentPosition = 0;
       }
@@ -394,14 +427,14 @@ async function spinContainer(cardContainerNumber, cardContainer, reelData) {
 
       if (currentPosition >= finalPosition - imageHeight && currentPosition <= finalPosition) {
         clearInterval(interval);
-        strip.style.transition = "transform 0.6s ease-out"; 
+        strip.style.transition = "transform 0.6s ease-out";
         strip.style.transform = `translateY(-${finalPosition}px)`;
         setTimeout(() => {
           strip.style.transition = "none";
           resolve();
-        }, 600); 
+        }, 600);
       }
-    }, 25); 
+    }, 25);
   });
 }
 
@@ -478,7 +511,6 @@ async function handleGameReset() {
   }
 
   spinButton.removeAttribute("disabled");
-  turnButton.removeAttribute("disabled");
 }
 
 function applyStylesToCurrentPlayer(playerId) {
@@ -551,13 +583,7 @@ function sendScoreUpdate(playerIdFunc) {
   socket.emit("game:setAssignedScores", { playerIdFunc });
   socket.emit("game:getAssignedScores");
   socket.once("game:returnAssignedScores", (data) => {
-    const assignedScores = data.assignedScores;
-    if (assignedScores.length === 1) {
-      spinButton.textContent = "Reveal!";
-    }
-    if (assignedScores.length >= 2) {
-      spinButton.textContent = "Spin!";
-    }
+    socket.emit("game:getSpinButtonState");
   });
 }
 
@@ -577,6 +603,7 @@ function handleReturnedScore(data) {
       scoreElement.classList.remove("score-update");
     }, 500);
   }
+  socket.emit("game:getSpinButtonState");
 }
 
 ////////////////////////////////////////////////////
@@ -596,7 +623,7 @@ spinButton.addEventListener("click", () => {
   } else if (spinButton.textContent === "Reveal!") {
     turnButton.setAttribute("disabled", true);
     socket.emit("game:setAssignedScores", { playerIdFunc: "0" });
-    spinButton.textContent = "Spin!";
+    socket.emit("game:getSpinButtonState");
   } else {
     socket.emit("game:spin");
   }

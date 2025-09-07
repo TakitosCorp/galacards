@@ -102,6 +102,12 @@ async function registerSocketHandlers(socket, io) {
     socket.emit("presentation:returnStatus", presentationData);
   });
 
+  socket.on("game:getSpinButtonState", async () => {
+    const db = await dbase.getDatabase();
+    const game = db.data.game;
+    socket.emit("game:returnSpinButtonState", { game });
+  });
+
   socket.on("disconnect", async () => {
     console.log(`Cliente desconectado. Auth ID: ${socket.playerId}`);
     await handleConnection(socket, io, "disconnect");
@@ -169,8 +175,18 @@ async function gameSpin(socket) {
   }
 
   const selected = getRandomImages(remainingImages, 4);
-  const hasMoreRounds = remainingImages.length - 4 >= 4;
-  const currentRound = (data.currentRound || 0) + 1;
+
+  await dbase.updateSelectedImages(selected);
+  await dbase.updateRemainingImages();
+  await dbase.updateCurrentRound();
+
+  const updatedData = await dbase.getGameState();
+  const updatedRemainingImages = updatedData.remainingImages || [];
+  const updatedCurrentRound = updatedData.currentRound || 1;
+  const totalRounds = updatedData.totalRounds || 1;
+
+  const hasMoreRounds = updatedRemainingImages.length >= 4 && updatedCurrentRound < totalRounds;
+
   const spinData = selected.map((finalImage, index) => {
     const fillerImages = getRandomImages(
       imageList.filter((img) => img !== finalImage),
@@ -185,13 +201,9 @@ async function gameSpin(socket) {
     spinData,
     selected,
     hasMoreRounds,
-    currentRound,
-    remainingImages: remainingImages.length - 4,
+    currentRound: updatedCurrentRound,
+    remainingImages: updatedRemainingImages.length,
   });
-
-  dbase.updateSelectedImages(selected);
-  dbase.updateRemainingImages();
-  dbase.updateCurrentRound();
 }
 
 async function handleNameChange(socket, playerId, name) {

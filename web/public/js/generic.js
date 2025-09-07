@@ -22,16 +22,22 @@ const nextPresentationButton = document.getElementById("nextPresentationButton")
 window.onload = () => {
   document.getElementById("background-video").playbackRate = 0.5;
 
-  if (resetPresentationButton) {
-    resetPresentationButton.addEventListener("click", () => {
-      socket.emit("presentation:reset");
-    });
-  }
-
-  if (nextPresentationButton) {
-    nextPresentationButton.addEventListener("click", () => {
-      socket.emit("presentation:next");
-    });
+  if (isPresentationMode) {
+    if (resetPresentationButton) {
+      resetPresentationButton.style.display = "block";
+      resetPresentationButton.addEventListener("click", () => {
+        socket.emit("presentation:reset");
+      });
+    }
+    if (nextPresentationButton) {
+      nextPresentationButton.style.display = "block";
+      nextPresentationButton.addEventListener("click", () => {
+        socket.emit("presentation:next");
+      });
+    }
+  } else {
+    if (resetPresentationButton) resetPresentationButton.style.display = "none";
+    if (nextPresentationButton) nextPresentationButton.style.display = "none";
   }
 };
 
@@ -67,17 +73,19 @@ socket.on("game:returnCurrentPlayer", (data) => {
   handleApplyCurrentRound(data);
 });
 
-socket.on("presentation:returnReset", (data) => {
-  handlePresentationReset();
-});
+if (isPresentationMode) {
+  socket.on("presentation:returnReset", (data) => {
+    handlePresentationReset();
+  });
 
-socket.on("presentation:returnNext", (data) => {
-  handlePresentationNext(data);
-});
+  socket.on("presentation:returnNext", (data) => {
+    handlePresentationNext(data);
+  });
 
-socket.on("presentation:returnAll", () => {
-  handlePresentationReset();
-});
+  socket.on("presentation:returnAll", () => {
+    handlePresentationReset();
+  });
+}
 
 ////////////////////////////////////////////////////
 //
@@ -115,7 +123,7 @@ function handlePlayerData(players, updateVdo, socket) {
 
   const presentationButtonsContainer = document.getElementById("presentationButtonsContainer");
   if (presentationButtonsContainer) {
-    if (playerId === hostId) {
+    if (isPresentationMode && playerId === hostId) {
       presentationButtonsContainer.style.display = "flex";
     } else {
       presentationButtonsContainer.style.display = "none";
@@ -157,9 +165,6 @@ function applyStylesToCurrentPlayer(playerId) {
   });
 
   if (playerId) {
-    turnAudio.volume = 0.6;
-    turnAudio.play();
-
     const iframeContainer = document.getElementById(`player${playerId}iframe`);
     if (iframeContainer) {
       iframeContainer.classList.add("shadow-glow", "scale-[1.04]");
@@ -203,7 +208,6 @@ function handlePresentationReset() {
     hostIframe.classList.add("player-focused");
   }
 
-  console.log("Presentación reiniciada manualmente");
 }
 
 function handlePresentationNext(data) {
@@ -223,8 +227,6 @@ function updatePresentationViewFromServer(presentationData) {
   const stage = presentationData.stage || 0;
   const isActive = presentationData.active || false;
 
-  console.log(`Actualizando presentación desde servidor: etapa=${stage}, activo=${isActive}`);
-
   resetPresentationEffects();
 
   applyPresentationEffects(stage);
@@ -236,8 +238,6 @@ function updatePresentationViewFromServer(presentationData) {
 }
 
 function resetPresentationEffects() {
-  console.log("Limpiando efectos de presentación");
-
   for (let i = 1; i <= 4; i++) {
     const iframe = document.getElementById(`player${i}iframe`);
     if (iframe) {
@@ -262,7 +262,6 @@ function resetPresentationEffects() {
 }
 
 function applyPresentationEffects(stage) {
-  console.log(`Aplicando efectos de presentación: etapa ${stage}`);
   const playerIframes = [];
   for (let i = 1; i <= 4; i++) {
     const iframe = document.getElementById(`player${i}iframe`);
@@ -272,7 +271,6 @@ function applyPresentationEffects(stage) {
   const hostIframe = document.getElementById("hostIframe");
 
   if (stage === 0) {
-    // Todos enfocados
     playerIframes.forEach((iframe) => {
       iframe.classList.remove("player-blurred");
       iframe.classList.add("player-focused");
