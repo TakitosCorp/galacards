@@ -21,7 +21,9 @@
 .crossfade-enter-active {
   opacity: 1;
   transform: scale(1);
-  transition: opacity 0.6s ease-in, transform 0.6s ease-in;
+  transition:
+    opacity 0.6s ease-in,
+    transform 0.6s ease-in;
 }
 
 .crossfade-exit {
@@ -32,7 +34,9 @@
 .crossfade-exit-active {
   opacity: 0;
   transform: scale(0.95);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
 }
 
 .score-update {

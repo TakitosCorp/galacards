@@ -38,9 +38,11 @@ async function safeDbWrite(retries = 3, delayMs = 100) {
       await db.write();
       return;
     } catch (err) {
-      if (err.code === 'EPERM' && attempt < retries) {
-        console.warn(`[DB] EPERM error on write, retrying (${attempt}/${retries})...`);
-        await new Promise(res => setTimeout(res, delayMs));
+      if (err.code === "EPERM" && attempt < retries) {
+        console.warn(
+          `[DB] EPERM error on write, retrying (${attempt}/${retries})...`,
+        );
+        await new Promise((res) => setTimeout(res, delayMs));
         continue;
       }
       console.error(`[DB] Critical write error:`, err);

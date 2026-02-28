@@ -13,14 +13,41 @@ const __dirname = path.dirname(__filename);
 
 const router = Router();
 
+const isValidId = (req, res, next) => {
+  const db = getDatabase();
+  const players = db.data.players || [];
+  const userId = req.query.id;
+
+  if (!userId) {
+    console.warn(`[Auth] Missing ID for route ${req.path}`);
+    return res.redirect("/error/401");
+  }
+
+  if (userId === "obs" || players.some((player) => player.id === userId)) {
+    return next();
+  }
+
+  console.warn(`[Auth] Invalid ID '${userId}' for route ${req.path}`);
+  return res.redirect("/error/401");
+};
+
 const isHost = (req, res, next) => {
   const db = getDatabase();
   const players = db.data.players || [];
   const userId = req.query.id;
 
+  if (!userId) {
+    console.warn(`[Auth] Missing ID for host route ${req.path}`);
+    return res.redirect("/error/401");
+  }
+
   if (players[0] && players[0].id === userId) {
     return next();
   }
+
+  console.warn(
+    `[Auth] Forbidden access for ID '${userId}' on host route ${req.path}`,
+  );
   return res.redirect("/error/403");
 };
 
@@ -29,20 +56,29 @@ const isHostOrPlayer = (req, res, next) => {
   const players = db.data.players || [];
   const userId = req.query.id;
 
+  if (!userId) {
+    console.warn(`[Auth] Missing ID for player route ${req.path}`);
+    return res.redirect("/error/401");
+  }
+
   if (players.some((player) => player.id === userId)) {
     return next();
   }
+
+  console.warn(
+    `[Auth] Forbidden access for ID '${userId}' on player route ${req.path}`,
+  );
   return res.redirect("/error/403");
 };
 
-router.get("/", (req, res) => {
+router.get("/", isValidId, (req, res) => {
   res.render("index", {
     title: `Home | ${config.gameName}`,
     gameTitle: config.gameName,
   });
 });
 
-router.get("/overlay", (req, res) => {
+router.get("/overlay", isValidId, (req, res) => {
   res.render("overlay", {
     title: `Overlay | ${config.gameName}`,
     gameTitle: config.gameName,
@@ -70,7 +106,7 @@ router.get("/player", isHostOrPlayer, (req, res) => {
   });
 });
 
-router.get("/list", (req, res) => {
+router.get("/list", isValidId, (req, res) => {
   if (!config.enableList) {
     return res.redirect("/error/403");
   }
@@ -88,7 +124,7 @@ router.get("/images", (req, res) => {
   const imageDir = path.join(__dirname, "..", "web", "public", "images");
   fs.readdir(imageDir, (err, files) => {
     if (err) {
-      console.error("Error reading the images directory:", err);
+      console.error("[FS] Error reading the images directory:", err);
       return res.status(500).json({ error: "Could not read the images" });
     }
 

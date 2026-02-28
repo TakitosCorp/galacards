@@ -29,43 +29,42 @@ app.set("views", path.join(__dirname, "web", "views"));
 
 app.use(express.json());
 
-// Routes
 app.use("/", webRoutes);
+
 app.get("/error/:code", (req, res) => {
   const code = parseInt(req.params.code, 10) || 404;
-  res
-    .status(code)
-    .render("error", {
-      title: `${config.gameName} | Error ${code}`,
-      errorCode: code,
-    });
+  res.status(code).render("error", {
+    title: `${config.gameName} | Error ${code}`,
+    errorCode: code,
+  });
 });
 
 app.use("/public", express.static(path.join(__dirname, "web", "public")));
 
-// Server initialization
+app.use((req, res) => {
+  console.warn(`[404] Route not found: ${req.originalUrl}`);
+  res.redirect("/error/404");
+});
 
-// Initialize socket.io
-initializeSocket(server);
-
-// Initialize database
 await dbase.initializeDatabase();
 
+initializeSocket(server);
+
 if (process.argv.includes("resetData")) {
+  console.log("[DB] Resetting app data...");
   await dbase.resetApp(config.gameUrl);
 }
 
-// Get the host ID from the database
 const db = dbase.getDatabase();
 const hostId = db.data.players[0]?.id;
 
 server.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`);
+  console.log(`[Server] Server listening on http://localhost:${port}`);
   if (hostId) {
     console.log(
-      `Controller available at ${config.gameUrl}/controller?id=${hostId}`,
+      `[Server] Controller available at ${config.gameUrl}/controller?id=${hostId}`,
     );
   } else {
-    console.log("Could not get the host ID.");
+    console.warn("[Server] Could not get the host ID.");
   }
 });
