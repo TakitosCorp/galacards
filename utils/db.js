@@ -31,6 +31,24 @@ const defaultData = {
 };
 let db;
 
+// Safe DB write with error handling and retry
+async function safeDbWrite(retries = 3, delayMs = 100) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await db.write();
+      return;
+    } catch (err) {
+      if (err.code === 'EPERM' && attempt < retries) {
+        console.warn(`[DB] EPERM error on write, retrying (${attempt}/${retries})...`);
+        await new Promise(res => setTimeout(res, delayMs));
+        continue;
+      }
+      console.error(`[DB] Critical write error:`, err);
+      throw err;
+    }
+  }
+}
+
 // Create a custom nanoid with letters and numbers
 const nanoid = customAlphabet(
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
@@ -81,7 +99,7 @@ async function generatePlayerData(gameBaseUrl) {
     db.data.players.push(player);
   }
 
-  await db.write();
+  await safeDbWrite();
 }
 
 // Function to generate game data
@@ -105,7 +123,7 @@ export async function generateGameData() {
     db.data.game.currentPlayer = null;
     db.data.game.assignedScores = [];
     await setAllPlayerScores(0);
-    await db.write();
+    await safeDbWrite();
   } catch (err) {
     console.error("Error reading the images directory:", err);
     throw new Error("Could not read the images");
@@ -115,7 +133,7 @@ export async function generateGameData() {
 export async function resetAfterSpin() {
   db.data.game.currentPlayer = null;
   db.data.game.assignedScores = [];
-  db.write();
+  await safeDbWrite();
 }
 
 // Player management section
@@ -133,11 +151,16 @@ export async function getAllPlayers() {
 }
 
 export async function updatePlayerName(playerId, name) {
-  console.log("Updating player name:", playerId, name);
+  console.log("[DB] Updating player name:", playerId, name);
   const player = db.data.players.find((p) => p.id === playerId);
   if (player) {
     player.name = typeof name === "string" ? name : player.name;
-    await db.write();
+    try {
+      await safeDbWrite();
+    } catch (err) {
+      console.error(`[DB] Failed to update player name for ${playerId}:`, err);
+      throw err;
+    }
   }
 }
 
@@ -149,24 +172,24 @@ export async function getGameState() {
 
 export async function updateGameState(newState) {
   db.data.game.gameState = newState;
-  await db.write();
+  await safeDbWrite();
 }
 
 export async function updateSelectedImages(selectedImages) {
   db.data.game.selectedImages = selectedImages;
-  await db.write();
+  await safeDbWrite();
 }
 
 export async function updateRemainingImages() {
   db.data.game.remainingImages = db.data.game.remainingImages.filter(
     (img) => !db.data.game.selectedImages.includes(img),
   );
-  await db.write();
+  await safeDbWrite();
 }
 
 export async function updateCurrentRound() {
   db.data.game.currentRound += 1;
-  await db.write();
+  await safeDbWrite();
 }
 
 // Scores management section
@@ -177,7 +200,7 @@ export async function addScore(playerId) {
     if (actualScores.length < 2) {
       actualScores.push(playerId);
       db.data.game.assignedScores = actualScores;
-      await db.write();
+      await safeDbWrite();
     }
     return;
   }
@@ -198,7 +221,7 @@ export async function addScore(playerId) {
   }
 
   db.data.game.assignedScores = actualScores;
-  await db.write();
+  await safeDbWrite();
 }
 
 export async function getPlayerScore(playerId) {
@@ -210,7 +233,7 @@ export async function setAllPlayerScores(score) {
   for (const player of db.data.players) {
     player.score = score;
   }
-  await db.write();
+  await safeDbWrite();
 }
 
 export async function getAllPlayerScores() {
@@ -253,7 +276,7 @@ export async function setCurrentPlayer() {
     }
   }
 
-  await db.write();
+  await safeDbWrite();
 }
 
 // Presentations management section
@@ -268,7 +291,7 @@ export async function resetPresentation() {
   db.data.game.presentation.currentPresenter = null;
   db.data.game.presentation.stage = 0;
 
-  await db.write();
+  await safeDbWrite();
   console.log("Presentation restarted: ", db.data.game.presentation);
   return db.data.game.presentation;
 }
@@ -313,6 +336,6 @@ export async function nextPresenter() {
     }
   }
 
-  await db.write();
+  await safeDbWrite();
   return db.data.game.presentation;
 }
