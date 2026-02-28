@@ -10,47 +10,81 @@
     Your browser does not support the video tag.
   </video>
 
-  <h1 class="text-5xl md:text-6xl text-white font-bold mb-10 animate-glow tracking-wider"><%= gameTitle %></h1>
+  <h1 class="text-4xl md:text-5xl text-white font-bold mb-10 animate-glow tracking-wider"><%= gameTitle %></h1>
 
-  <div id="slide-container" class="w-full max-w-7xl h-[640px] mx-auto rounded-2xl shadow-2xl overflow-y-auto backdrop-blur-sm bg-purple-bg/40 flex flex-col justify-center p-6 md:p-8 text-white text-center">
-    <div id="slide-start" class="slide mx-auto w-full md:w-[90%] text-left">
-      <h2 class="text-3xl md:text-4xl font-bold text-purple-light mb-6 text-center">Hello, welcome to!</h2>
-      <p class="text-lg md:text-xl text-purple-hover mb-4 text-center">
-        Welcome to a special edition of "Who am I?" with a unique twist: all characters are VTubers! Each player will have a turn to ask questions and figure out which VTuber they've been assigned. But beware, you only have two attempts to guess, so choose your questions wisely!
-      </p>
-      <br>
-      <p class="text-lg md:text-xl text-purple-hover mb-4 text-center">
-        This game is designed for you to have fun, laugh, and discover new VTubers. Any feedback or suggestions will be valuable to improve in the future. Enjoy it to the fullest, ask if you have doubts, and have a great time!
-      </p>
-      <p class="text-2xl md:text-3xl font-bold mt-8 text-center text-purple-light animate-pulse">
-        LET'S PLAY! <span class="text-pink-400">&lt;3</span>
-      </p>
-    </div>
-    
-    <div id="slide-end" class="slide hidden mx-auto w-full md:w-[90%]">
-      <h2 class="text-3xl md:text-4xl font-bold text-purple-light mb-6 text-center">Game Rules</h2>
-      <div class="text-center mx-auto max-w-6xl text-purple-hover space-y-4 text-sm md:text-xl">
-        <p>On each turn, you can only ask one question to try to figure out who you are.</p>
-        <p>It is not allowed to abuse "trick" questions that may break the game dynamics.</p>
-        <p>You have a maximum of 2 attempts to correctly guess who you are.</p>
-        <p>The first person to guess correctly gets 1 point, and the second gets 0.5 points.</p>
-        <p>Do not cheat or look at the live stream to get clues.</p>
-        <p>If you need more information, you can use Google or any other tool.</p>
-        <p>If you prefer, you can write down your questions in a notepad to organize yourself better.</p>
-        <p>When you think you know the answer, wait for your next turn to confirm it.</p>
+  <div class="w-full max-w-7xl h-[640px] mx-auto rounded-2xl shadow-2xl overflow-y-auto backdrop-blur-sm bg-purple-bg/40 p-6 md:p-8 flex flex-col justify-between">
+
+    <div id="slides-wrapper" class="relative flex-grow flex items-center justify-center overflow-hidden">
+
+      <div class="slide absolute inset-0 flex flex-col justify-center items-center text-center transition-all duration-500 opacity-100 scale-100" id="slide-0">
+        <h3 class="text-xl md:text-3xl font-bold text-purple-light mb-6 animate-glow">A GalaGaoo & GaoCorp Event</h3>
+        <p class="text-lg md:text-xl text-white leading-relaxed max-w-4xl font-medium">
+          Welcome to a new edition of <span class="text-purple-light font-bold"><%= gameTitle %></span>! <br><br>
+          This event is designed to celebrate the creators within our community and to have some fun between us. <br><br>
+          Today, you aren't just playing a game—you are stepping into the identity of your fellow VTubers. <br><br>
+          It's time to see how well you truly know your peers in this high-stakes battle of deduction and social engineering. <br><br>
+          Good luck guessing!
+        </p>
       </div>
+
+      <div class="slide absolute inset-0 flex flex-col justify-center items-center text-center transition-all duration-500 opacity-0 scale-95 pointer-events-none" id="slide-1">
+        <h3 class="text-xl md:text-3xl font-bold text-purple-light mb-6 animate-glow">The Community Roster</h3>
+        <div class="max-w-4xl">
+          <p class="text-base md:text-lg text-white leading-relaxed mb-4">
+            The pool of characters consists entirely of VTubers from our community circle. The reference list was provided to you in advance for your preparation; however, now that we have reached game day, the access is <span class="text-pink-400 font-bold">strictly locked</span>.
+          </p>
+          <p class="text-base md:text-lg text-white leading-relaxed italic">
+            Success now depends solely on your memory of names, designs, and personalities. We hope you studied well during the past week, because once the round starts, you are on your own.
+          </p>
+        </div>
+      </div>
+
+      <div class="slide absolute inset-0 flex flex-col justify-center items-center text-center transition-all duration-500 opacity-0 scale-95 pointer-events-none" id="slide-2">
+        <h3 class="text-xl md:text-3xl font-bold text-purple-light mb-6 animate-glow">Event Rules (yes, we have rules ;p)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left w-full max-w-5xl">
+          <div class="bg-purple-bg/60 p-5 rounded-xl border border-purple-light/20 shadow-card">
+            <h4 class="text-purple-light font-bold mb-1 uppercase text-sm tracking-widest">Unlimited Turns</h4>
+            <p class="text-white text-sm leading-snug">Rounds feature infinite turns. You can take your time to ask specific "Yes/No" questions to narrow down your identity before committing to a guess.</p>
+          </div>
+          <div class="bg-purple-bg/60 p-5 rounded-xl border border-purple-light/20 shadow-card">
+            <h4 class="text-pink-400 font-bold mb-1 uppercase text-sm tracking-widest">Limited Guesses</h4>
+            <p class="text-white text-sm leading-snug">You have only <span class="font-bold underline">2 attempts</span> to guess correctly. If both guesses are wrong, you immediately lose the round and are eliminated from scoring.</p>
+          </div>
+          <div class="bg-purple-bg/60 p-5 rounded-xl border border-purple-light/20 shadow-card">
+            <h4 class="text-purple-light font-bold mb-1 uppercase text-sm tracking-widest">Two-Winner Cap</h4>
+            <p class="text-white text-sm leading-snug">Only the first two players to guess correctly win points. 1st place earns <span class="font-bold text-pink-400 text-lg">1.0</span> points, and 2nd place earns <span class="font-bold text-pink-400 text-lg">0.5</span> points.</p>
+          </div>
+          <div class="bg-purple-bg/60 p-5 rounded-xl border border-purple-light/20 shadow-card">
+            <h4 class="text-pink-400 font-bold mb-1 uppercase text-sm tracking-widest">Zero Cheating Policy</h4>
+            <p class="text-white text-sm leading-snug">Watching any live stream (the host's or other players' stream) is <span class="font-bold italic">strictly forbidden</span>. Violation results in immediate disqualification.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Navigation Controls -->
-    <div class="mt-8 flex gap-4 justify-center">
-      <button id="prev-btn" class="px-6 py-2 bg-purple-light text-white font-bold rounded-lg shadow-md disabled:opacity-50 hover:bg-purple-hover transition-colors duration-300" disabled>Previous</button>
-      <button id="next-btn" class="px-6 py-2 bg-purple-light text-white font-bold rounded-lg shadow-md hover:bg-purple-hover transition-colors duration-300">Next</button>
-      <button id="vamos-btn" class="px-6 py-2 bg-pink-400 text-white font-bold rounded-lg shadow-md hidden hover:bg-pink-500 transition-colors duration-300">Let's go!</button>
+    <div class="flex flex-col items-center gap-6">
+      <div class="flex space-x-3" id="dots-container">
+        <div class="w-2.5 h-2.5 rounded-full bg-purple-light transition-all duration-300 scale-125 shadow-glow" data-index="0"></div>
+        <div class="w-2.5 h-2.5 rounded-full bg-purple-light/20 transition-all duration-300" data-index="1"></div>
+        <div class="w-2.5 h-2.5 rounded-full bg-purple-light/20 transition-all duration-300" data-index="2"></div>
+      </div>
+
+      <div class="flex gap-4 w-full max-w-sm">
+        <button id="prev-btn" class="w-full py-2 bg-purple-light text-purple-dark text-base font-bold rounded-lg opacity-0 pointer-events-none transition-all duration-300 hover:bg-purple-hover transform hover:translate-y-[-2px] shadow-md">
+          Back
+        </button>
+        <button id="next-btn" class="w-full py-2 bg-purple-light text-purple-dark text-base font-bold rounded-lg transition-all duration-300 hover:bg-purple-hover transform hover:translate-y-[-2px] shadow-md">
+          Next
+        </button>
+        <button id="vamos-btn" class="w-full py-2 bg-pink-500 text-white text-base font-bold rounded-lg hidden transition-all duration-300 hover:bg-pink-400 transform hover:translate-y-[-2px] shadow-md animate-pulse">
+          Let's game!
+        </button>
+      </div>
     </div>
   </div>
 
   <script src="/public/js/index.js"></script>
-
   <%- include('components/scripts') %>
 </body>
 
