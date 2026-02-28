@@ -1,8 +1,4 @@
-////////////////////////////////////////////////////
-//
-// Sección de configuración y constantes
-//
-///////////////////////////////////////////////////
+// Configuration and constants section
 
 const queryParams = new URLSearchParams(window.location.search);
 const playerId = queryParams.get("id");
@@ -10,14 +6,14 @@ const isDevMode = queryParams.get("dev") === "true";
 const isPresentationMode = queryParams.get("mode") === "presentation";
 const turnAudio = new Audio("/public/sounds/turn.mp3");
 let hostId = null;
-const resetPresentationButton = document.getElementById("resetPresentationButton");
-const nextPresentationButton = document.getElementById("nextPresentationButton");
+const resetPresentationButton = document.getElementById(
+  "resetPresentationButton",
+);
+const nextPresentationButton = document.getElementById(
+  "nextPresentationButton",
+);
 
-////////////////////////////////////////////////////
-//
-// Sección de inicialización
-//
-///////////////////////////////////////////////////
+// Initialization section
 
 window.onload = () => {
   document.getElementById("background-video").playbackRate = 0.5;
@@ -41,11 +37,7 @@ window.onload = () => {
   }
 };
 
-////////////////////////////////////////////////////
-//
-// Sección de socket.io
-//
-///////////////////////////////////////////////////
+// socket.io section
 
 const socket = io(window.location.host, {
   auth: { id: playerId },
@@ -87,11 +79,7 @@ if (isPresentationMode) {
   });
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de funciones auxiliares para el socket
-//
-///////////////////////////////////////////////////
+// Socket helper functions section
 
 function handleReturnedData(data, socket) {
   const players = data.players || [];
@@ -109,7 +97,9 @@ function handleReturnedData(data, socket) {
   if (currentPlayerPosition) {
     resetHighlightEffects();
 
-    const iframeContainer = document.getElementById(`player${currentPlayerPosition}iframe`);
+    const iframeContainer = document.getElementById(
+      `player${currentPlayerPosition}iframe`,
+    );
     if (iframeContainer) {
       highlightElement(iframeContainer);
     }
@@ -121,7 +111,9 @@ function handlePlayerData(players, updateVdo, socket) {
   const hostIframe = document.getElementById("hostIframe");
   const hostName = document.getElementById("hostName");
 
-  const presentationButtonsContainer = document.getElementById("presentationButtonsContainer");
+  const presentationButtonsContainer = document.getElementById(
+    "presentationButtonsContainer",
+  );
   if (presentationButtonsContainer) {
     if (isPresentationMode && playerId === hostId) {
       presentationButtonsContainer.style.display = "flex";
@@ -142,7 +134,7 @@ function handlePlayerData(players, updateVdo, socket) {
     const playerIframe = document.getElementById(`player${index + 1}iframe`);
 
     if (playerName) {
-      playerName.innerText = player.name || `Jugador ${index + 1}`;
+      playerName.innerText = player.name || `Player ${index + 1}`;
     }
 
     if (playerIframe && updateVdo) {
@@ -159,7 +151,9 @@ function handleApplyCurrentRound(data) {
 }
 
 function applyStylesToCurrentPlayer(playerId) {
-  const currentHighlightedElements = document.querySelectorAll(".shadow-glow.scale-\\[1\\.04\\]");
+  const currentHighlightedElements = document.querySelectorAll(
+    ".shadow-glow.scale-\\[1\\.04\\]",
+  );
   currentHighlightedElements.forEach((element) => {
     element.classList.remove("shadow-glow", "scale-[1.04]");
   });
@@ -173,7 +167,9 @@ function applyStylesToCurrentPlayer(playerId) {
 }
 
 function resetHighlightEffects() {
-  const currentHighlightedElements = document.querySelectorAll(".shadow-glow, .scale-\\[1\\.04\\]");
+  const currentHighlightedElements = document.querySelectorAll(
+    ".shadow-glow, .scale-\\[1\\.04\\]",
+  );
   currentHighlightedElements.forEach((element) => {
     element.classList.remove("shadow-glow", "scale-[1.04]");
   });
@@ -183,11 +179,7 @@ function highlightElement(element) {
   element.classList.add("shadow-glow", "scale-[1.04]");
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de funciones para las presentaciones
-//
-///////////////////////////////////////////////////
+// Presentations functions section
 
 function handlePresentationReset() {
   resetHighlightEffects();
@@ -207,7 +199,6 @@ function handlePresentationReset() {
   if (hostIframe) {
     hostIframe.classList.add("player-focused");
   }
-
 }
 
 function handlePresentationNext(data) {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <%- include('components/head') %>
 
 <link rel="stylesheet" href="/public/css/vid.css">
@@ -7,7 +7,7 @@
 <body class="min-h-screen p-6 md:p-8 flex flex-col items-center justify-center">
   <video id="background-video" autoplay muted loop playbackRate="0.5">
     <source src="/public/vids/bg.webm" type="video/webm">
-    Tu navegador no soporta el elemento de video.
+    Your browser does not support the video tag.
   </video>
 
   <h1 class="text-5xl md:text-6xl text-white font-bold mb-10 animate-glow tracking-wider"><%= gameTitle %></h1>
@@ -16,37 +16,37 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 md:gap-6 p-6 md:p-8">
 
       <div class="w-full flex flex-col items-center">
-        <span id="cardName1" class="text-white text-base font-bold mb-4 animate-glow">¿Conseguirás</span>
+        <span id="cardName1" class="text-white text-base font-bold mb-4 animate-glow">Can you</span>
         <div class="w-full h-0 pb-[133.33%] relative">
           <div id="cardContainer1" class="absolute inset-0 rounded-2xl bg-purple-card border-2 border-purple-light shadow-card transition-all duration-300 flex justify-center transform overflow-hidden">
-            <img id="cardGenerica1" src="/public/images/GENERAL.avif" alt="Card genérica" class="w-full h-full object-cover rounded-2xl" style="position: relative; opacity: 1; z-index: 1;">
+            <img id="cardGenerica1" src="/public/images/GENERAL.avif" alt="Generic card" class="w-full h-full object-cover rounded-2xl" style="position: relative; opacity: 1; z-index: 1;">
           </div>
         </div>
       </div>
 
       <div class="w-full flex flex-col items-center">
-        <span id="cardName2" class="text-white text-base font-bold mb-4 animate-glow">adivinar</span>
+        <span id="cardName2" class="text-white text-base font-bold mb-4 animate-glow">guess</span>
         <div class="w-full h-0 pb-[133.33%] relative">
           <div id="cardContainer2" class="absolute inset-0 rounded-2xl bg-purple-card border-2 border-purple-light shadow-card transition-all duration-300 flex justify-center transform overflow-hidden">
-            <img id="cardGenerica2" src="/public/images/GENERAL.avif" alt="Card genérica" class="w-full h-full object-cover rounded-2xl" style="position: relative; opacity: 1; z-index: 1;">
+            <img id="cardGenerica2" src="/public/images/GENERAL.avif" alt="Generic card" class="w-full h-full object-cover rounded-2xl" style="position: relative; opacity: 1; z-index: 1;">
           </div>
         </div>
       </div>
 
       <div class="w-full flex flex-col items-center">
-        <span id="cardName3" class="text-white text-base font-bold mb-4 animate-glow">quién</span>
+        <span id="cardName3" class="text-white text-base font-bold mb-4 animate-glow">who</span>
         <div class="w-full h-0 pb-[133.33%] relative">
           <div id="cardContainer3" class="absolute inset-0 rounded-2xl bg-purple-card border-2 border-purple-light shadow-card transition-all duration-300 flex justify-center transform overflow-hidden">
-            <img id="cardGenerica3" src="/public/images/GENERAL.avif" alt="Card genérica" class="w-full h-full object-cover rounded-2xl" style="position: relative; opacity: 1; z-index: 1;">
+            <img id="cardGenerica3" src="/public/images/GENERAL.avif" alt="Generic card" class="w-full h-full object-cover rounded-2xl" style="position: relative; opacity: 1; z-index: 1;">
           </div>
         </div>
       </div>
 
       <div class="w-full flex flex-col items-center">
-        <span id="cardName4" class="text-white text-base font-bold mb-4 animate-glow">eres?</span>
+        <span id="cardName4" class="text-white text-base font-bold mb-4 animate-glow">you are?</span>
         <div class="w-full h-0 pb-[133.33%] relative">
           <div id="cardContainer4" class="absolute inset-0 rounded-2xl bg-purple-card border-2 border-purple-light shadow-card transition-all duration-300 flex justify-center transform overflow-hidden">
-            <img id="cardGenerica4" src="/public/images/GENERAL.avif" alt="Card genérica" class="w-full h-full object-cover rounded-2xl" style="position: relative; opacity: 1; z-index: 1;">
+            <img id="cardGenerica4" src="/public/images/GENERAL.avif" alt="Generic card" class="w-full h-full object-cover rounded-2xl" style="position: relative; opacity: 1; z-index: 1;">
           </div>
         </div>
       </div>
@@ -55,7 +55,7 @@
         <span class="text-transparent text-base font-bold mb-4">&nbsp;</span>
         <div class="w-full h-0 pb-[133.33%] relative">
           <div class="absolute inset-0 rounded-2xl bg-purple-medium border-2 border-purple-light shadow-card flex flex-col items-center justify-start p-4">
-            <h3 class="text-2xl text-purple-light font-bold mb-3 border-b-2 border-purple-light w-full text-center">Puntos</h3>
+            <h3 class="text-2xl text-purple-light font-bold mb-3 border-b-2 border-purple-light w-full text-center">Points</h3>
             <div class="text-center space-y-1 w-full overflow-y-auto scrollbar-hide" id="pointsContainer">
             </div>
           </div>
@@ -69,10 +69,10 @@
             <h3 class="text-2xl text-purple-light font-bold mb-6 border-b-2 border-purple-light pb-2 w-full text-center">Stats</h3>
             <div class="text-center space-y-4 w-full">
               <div class="bg-purple-bg bg-opacity-50 rounded-lg p-3">
-                <p class="text-white">Restante: <span class="font-bold text-purple-light" id="avaliableCards">0</span></p>
+                <p class="text-white">Remaining: <span class="font-bold text-purple-light" id="avaliableCards">0</span></p>
               </div>
               <div class="bg-purple-bg bg-opacity-50 rounded-lg p-3">
-                <p class="text-white">Ronda: <span class="font-bold text-purple-light" id="roundNumber">0</span>/<span class="font-bold text-purple-light" id="totalRounds">0</span></p>
+                <p class="text-white">Round: <span class="font-bold text-purple-light" id="roundNumber">0</span>/<span class="font-bold text-purple-light" id="totalRounds">0</span></p>
               </div>
             </div>
           </div>
@@ -83,28 +83,28 @@
         <div class="w-full h-0 pb-[133.33%] relative">
           <iframe class="absolute inset-0 w-full h-full rounded-2xl border-2 border-purple-light shadow-card transition-all duration-300 transform pointer-events-none" style="background-color: transparent;" src="" id="player1iframe"></iframe>
         </div>
-        <span id="playerName1" class="text-white text-base font-bold animate-glow mt-4 transition-all duration-300">Nya</span>
+        <span id="playerName1" class="text-white text-base font-bold animate-glow mt-4 transition-all duration-300">Player 1</span>
       </div>
 
       <div class="w-full flex flex-col items-center">
         <div class="w-full h-0 pb-[133.33%] relative">
           <iframe class="absolute inset-0 w-full h-full rounded-2xl border-2 border-purple-light shadow-card transition-all duration-300 transform pointer-events-none" style="background-color: transparent;" src="" id="player2iframe"></iframe>
         </div>
-        <span id="playerName2" class="text-white text-base font-bold animate-glow mt-4 transition-all duration-300">Tramposo/a</span>
+        <span id="playerName2" class="text-white text-base font-bold animate-glow mt-4 transition-all duration-300">Player 2</span>
       </div>
 
       <div class="w-full flex flex-col items-center">
         <div class="w-full h-0 pb-[133.33%] relative">
           <iframe class="absolute inset-0 w-full h-full rounded-2xl border-2 border-purple-light shadow-card transition-all duration-300 transform pointer-events-none" style="background-color: transparent;" src="" id="player3iframe"></iframe>
         </div>
-        <span id="playerName3" class="text-white text-base font-bold animate-glow mt-4 transition-all duration-300">Quién vive en la</span>
+        <span id="playerName3" class="text-white text-base font-bold animate-glow mt-4 transition-all duration-300">Player 3</span>
       </div>
 
       <div class="w-full flex flex-col items-center">
         <div class="w-full h-0 pb-[133.33%] relative">
           <iframe class="absolute inset-0 w-full h-full rounded-2xl border-2 border-purple-light shadow-card transition-all duration-300 transform pointer-events-none" style="background-color: transparent;" src="" id="player4iframe"></iframe>
         </div>
-        <span id="playerName4" class="text-white text-base font-bold animate-glow mt-4 transition-all duration-300">piña bajo el mar?</span>
+        <span id="playerName4" class="text-white text-base font-bold animate-glow mt-4 transition-all duration-300">Player 4</span>
       </div>
 
       <div class="w-full flex flex-col items-center">
@@ -117,16 +117,16 @@
       <div class="w-full flex flex-col items-center">
         <div class="w-full h-0 pb-[133.33%] relative">
           <div class="absolute inset-0 rounded-2xl bg-purple-medium border-2 border-purple-light shadow-card flex flex-col items-center justify-center p-6">
-            <h3 class="text-2xl text-purple-light font-bold mb-6 border-b-2 border-purple-light pb-2 w-full text-center">Controles</h3>
+            <h3 class="text-2xl text-purple-light font-bold mb-6 border-b-2 border-purple-light pb-2 w-full text-center">Controls</h3>
             <div class="space-y-3 w-full">
               <button class="w-full py-2 bg-purple-light text-purple-dark text-base font-bold rounded-lg transition-colors duration-300 shadow-md transform disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:translate-y-0 enabled:hover:bg-purple-hover enabled:hover:translate-y-[-2px]" id="spinButton">
                 Spin!
               </button>
               <button class="w-full py-2 bg-purple-light text-purple-dark text-base font-bold rounded-lg transition-colors duration-300 shadow-md transform disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:translate-y-0 enabled:hover:bg-purple-hover enabled:hover:translate-y-[-2px]" id="turnButton">
-                Turno
+                Turn
               </button>
               <button id="getPlayerLinks" class="w-full py-2 bg-purple-light text-purple-dark text-base font-bold rounded-lg hover:bg-purple-hover transition-colors duration-300 shadow-md transform hover:translate-y-[-2px]">
-                Ver links
+                View links
               </button>
             </div>
           </div>

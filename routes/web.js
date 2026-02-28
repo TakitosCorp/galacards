@@ -36,30 +36,48 @@ const isHostOrPlayer = (req, res, next) => {
 };
 
 router.get("/", (req, res) => {
-  res.render("index", { title: `Inicio | ${config.gameName}`, gameTitle: config.gameName });
+  res.render("index", {
+    title: `Home | ${config.gameName}`,
+    gameTitle: config.gameName,
+  });
 });
 
 router.get("/overlay", (req, res) => {
-  res.render("overlay", { title: `Overlay | ${config.gameName}`, gameTitle: config.gameName });
+  res.render("overlay", {
+    title: `Overlay | ${config.gameName}`,
+    gameTitle: config.gameName,
+  });
 });
 
 router.get("/generic", isHostOrPlayer, (req, res) => {
-  res.render("generic", { title: `Generic | ${config.gameName}`, gameTitle: config.gameName });
+  res.render("generic", {
+    title: `Generic | ${config.gameName}`,
+    gameTitle: config.gameName,
+  });
 });
 
 router.get("/controller", isHost, (req, res) => {
-  res.render("controller", { title: `Control | ${config.gameName}`, gameTitle: config.gameName });
+  res.render("controller", {
+    title: `Control | ${config.gameName}`,
+    gameTitle: config.gameName,
+  });
 });
 
 router.get("/player", isHostOrPlayer, (req, res) => {
-  res.render("player", { title: `Juego | ${config.gameName}`, gameTitle: config.gameName });
+  res.render("player", {
+    title: `Game | ${config.gameName}`,
+    gameTitle: config.gameName,
+  });
 });
 
 router.get("/list", (req, res) => {
   if (!config.enableList) {
     return res.redirect("/error/403");
   }
-  res.render("list", { title: `Listado | ${config.gameName}`, gameTitle: config.gameName });
+  res.render("list", {
+    title: `List | ${config.gameName}`,
+    gameTitle: config.gameName,
+  });
 });
 
 router.get("/sw.js", (req, res) => {
@@ -70,12 +88,16 @@ router.get("/images", (req, res) => {
   const imageDir = path.join(__dirname, "..", "web", "public", "images");
   fs.readdir(imageDir, (err, files) => {
     if (err) {
-      console.error("Error leyendo el directorio de imágenes:", err);
-      return res.status(500).json({ error: "No se pudo leer las imágenes" });
+      console.error("Error reading the images directory:", err);
+      return res.status(500).json({ error: "Could not read the images" });
     }
 
     const images = files.filter(
-      (file) => file !== "favicon.png" && file !== "LOGO.avif" && file !== "TC.avif" && file !== "GENERAL.avif"
+      (file) =>
+        file !== "favicon.png" &&
+        file !== "LOGO.avif" &&
+        file !== "TC.avif" &&
+        file !== "GENERAL.avif",
     );
     res.json(images);
   });

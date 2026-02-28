@@ -1,8 +1,4 @@
-////////////////////////////////////////////////////
-//
-// Sección de configuración y constantes
-//
-///////////////////////////////////////////////////
+// Configuration and constants section
 
 const queryParams = new URLSearchParams(window.location.search);
 const playerId = queryParams.get("id");
@@ -32,22 +28,14 @@ const avaliableCards = document.getElementById("avaliableCards");
 const currentRound = document.getElementById("roundNumber");
 const totalRounds = document.getElementById("totalRounds");
 
-////////////////////////////////////////////////////
-//
-// Sección de inicialización
-//
-///////////////////////////////////////////////////
+// Initialization section
 
 window.onload = () => {
   document.getElementById("background-video").playbackRate = 0.5;
   audio.loop = true;
 };
 
-////////////////////////////////////////////////////
-//
-// Sección de socket.io
-//
-///////////////////////////////////////////////////
+// socket.io section
 
 const socket = io(window.location.host, {
   auth: { id: playerId },
@@ -84,8 +72,15 @@ socket.on("game:returnGameData", (data) => {
 });
 
 socket.on("game:returnSpin", async (data) => {
-  const { spinData, selected, hasMoreRounds, currentRound, remainingImages } = data;
-  await handleSpinData(spinData, selected, hasMoreRounds, currentRound, remainingImages);
+  const { spinData, selected, hasMoreRounds, currentRound, remainingImages } =
+    data;
+  await handleSpinData(
+    spinData,
+    selected,
+    hasMoreRounds,
+    currentRound,
+    remainingImages,
+  );
 });
 
 socket.on("game:returnScore", (data) => {
@@ -104,11 +99,7 @@ socket.on("game:returnSpinButtonState", (data) => {
   updateSpinButtonState(data.game);
 });
 
-////////////////////////////////////////////////////
-//
-// Sección de funciones auxiliares para el socket
-//
-///////////////////////////////////////////////////
+// Socket helper functions section
 
 function handleReturnedData(data, socket) {
   const game = data.game || {};
@@ -138,10 +129,16 @@ function handleReturnedData(data, socket) {
     if (game.assignedScores.length >= 2) {
       turnButton.setAttribute("disabled", true);
     }
-    const cardContainer = document.getElementById(`cardContainer${currentPlayerPosition}`);
-    const iframeContainer = document.getElementById(`player${currentPlayerPosition}iframe`);
+    const cardContainer = document.getElementById(
+      `cardContainer${currentPlayerPosition}`,
+    );
+    const iframeContainer = document.getElementById(
+      `player${currentPlayerPosition}iframe`,
+    );
 
-    const currentHighlightedCard = document.querySelector(".shadow-glow .scale-\\[1\\.04\\]");
+    const currentHighlightedCard = document.querySelector(
+      ".shadow-glow .scale-\\[1\\.04\\]",
+    );
     if (currentHighlightedCard) {
       currentHighlightedCard.classList.remove("shadow-glow", "scale-[1.04]");
     }
@@ -157,7 +154,9 @@ function handleReturnedData(data, socket) {
     spinButton.removeAttribute("disabled");
     spinButton.textContent = "Spin!";
     turnButton.setAttribute("disabled", true);
-    const currentHighlightedCard = document.querySelector(".shadow-glow .scale-\\[1\\.04\\]");
+    const currentHighlightedCard = document.querySelector(
+      ".shadow-glow .scale-\\[1\\.04\\]",
+    );
     if (currentHighlightedCard) {
       currentHighlightedCard.classList.remove("shadow-glow", "scale-[1.04]");
     }
@@ -173,7 +172,7 @@ function handlePlayerData(players, updateVdo, socket) {
     if (updateVdo) {
       hostIframe.src = `https://vdo.ninja/?view=${hostId}&autoplay=1&controls=0&muted=1&noaudio=1&cleanoutput&codec=h264,vp8,vp9,av1&fadein&bitrate=2000`;
     }
-    hostName.textContent = players[0]?.name || "Pulpo a la gallega";
+    hostName.textContent = players[0]?.name || "Host";
   }
   pointsContainer.innerHTML = "";
 
@@ -184,7 +183,7 @@ function handlePlayerData(players, updateVdo, socket) {
     pointsContainer.innerHTML += `
     <div class="bg-purple-bg bg-opacity-50 rounded-lg p-2">
         <p class="text-white text-sm">
-      ${player.name}: 
+      ${player.name}:
       <span id="score-${player.id}" class="font-bold text-purple-light score-update">${player.score}</span>
         </p>
     </div>`;
@@ -207,9 +206,9 @@ function handlePlayerData(players, updateVdo, socket) {
 
   players.forEach((player) => {
     if (player.id === playerId) {
-      if (player.id === players[0].id && player.name.includes("Pulpo a la gallega")) {
+      if (player.id === players[0].id && player.name.includes("Host")) {
         promptForUsername(socket);
-      } else if (player.name.includes("Jugador")) {
+      } else if (player.name.includes("Player")) {
         promptForUsername(socket);
       }
     }
@@ -244,11 +243,15 @@ function handleGameData(game) {
       cardNames[index].textContent = formattedName;
     });
   }
-  document.getElementById("avaliableCards").textContent = game.remainingImages.length;
+  document.getElementById("avaliableCards").textContent =
+    game.remainingImages.length;
   document.getElementById("roundNumber").textContent = game.currentRound;
   document.getElementById("totalRounds").textContent = game.totalRounds;
 
-  if (game.remainingImages.length === 0 || game.currentRound >= game.totalRounds) {
+  if (
+    game.remainingImages.length === 0 ||
+    game.currentRound >= game.totalRounds
+  ) {
     spinButton.setAttribute("disabled", false);
     spinButton.textContent = "Reset";
   }
@@ -257,7 +260,9 @@ function handleGameData(game) {
   if (currentPlayer) {
     applyStylesToCurrentPlayer(currentPlayer);
   } else {
-    const currentHighlightedCard = document.querySelector(".shadow-glow .scale-\\[1\\.04\\]");
+    const currentHighlightedCard = document.querySelector(
+      ".shadow-glow .scale-\\[1\\.04\\]",
+    );
     if (currentHighlightedCard) {
       currentHighlightedCard.classList.remove("shadow-glow", "scale-[1.04]");
     }
@@ -266,7 +271,10 @@ function handleGameData(game) {
 
 function updateSpinButtonState(game) {
   if (!game) return;
-  if (game.remainingImages.length === 0 || game.currentRound >= game.totalRounds) {
+  if (
+    game.remainingImages.length === 0 ||
+    game.currentRound >= game.totalRounds
+  ) {
     spinButton.textContent = "Reset";
     spinButton.removeAttribute("disabled");
   } else if (!game.currentPlayer) {
@@ -284,11 +292,7 @@ function updateSpinButtonState(game) {
   }
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de funciones auxiliares para el juego
-//
-///////////////////////////////////////////////////
+// Game helper functions section
 
 function createImageElement(imageName) {
   const img = document.createElement("img");
@@ -315,10 +319,18 @@ function preloadImages(imageArray) {
   });
 }
 
-async function handleSpinData(spinData, selected, hasMoreRounds, cRound, remainingImages) {
+async function handleSpinData(
+  spinData,
+  selected,
+  hasMoreRounds,
+  cRound,
+  remainingImages,
+) {
   spinButton.setAttribute("disabled", true);
   turnButton.setAttribute("disabled", true);
-  const elementsWithEffects = document.querySelectorAll(".shadow-glow, .scale-\\[1\\.04\\]");
+  const elementsWithEffects = document.querySelectorAll(
+    ".shadow-glow, .scale-\\[1\\.04\\]",
+  );
   elementsWithEffects.forEach((element) => {
     element.classList.remove("shadow-glow", "scale-[1.04]");
   });
@@ -378,7 +390,9 @@ async function handleSpinData(spinData, selected, hasMoreRounds, cRound, remaini
 
 async function spinContainer(cardContainerNumber, cardContainer, reelData) {
   return new Promise((resolve) => {
-    const initialImage = document.getElementById(`cardGenerica${cardContainerNumber + 1}`);
+    const initialImage = document.getElementById(
+      `cardGenerica${cardContainerNumber + 1}`,
+    );
 
     const oldStrip = cardContainer.querySelector(".strip");
     if (oldStrip) {
@@ -409,7 +423,10 @@ async function spinContainer(cardContainerNumber, cardContainer, reelData) {
     });
 
     const tempImage = cardContainer.querySelector("img:not(.strip img)");
-    if (tempImage && tempImage.id !== `cardGenerica${cardContainerNumber + 1}`) {
+    if (
+      tempImage &&
+      tempImage.id !== `cardGenerica${cardContainerNumber + 1}`
+    ) {
       tempImage.remove();
     }
 
@@ -425,7 +442,10 @@ async function spinContainer(cardContainerNumber, cardContainer, reelData) {
 
       strip.style.transform = `translateY(-${currentPosition}px)`;
 
-      if (currentPosition >= finalPosition - imageHeight && currentPosition <= finalPosition) {
+      if (
+        currentPosition >= finalPosition - imageHeight &&
+        currentPosition <= finalPosition
+      ) {
         clearInterval(interval);
         strip.style.transition = "transform 0.6s ease-out";
         strip.style.transform = `translateY(-${finalPosition}px)`;
@@ -451,8 +471,12 @@ async function handleGameReset() {
   await Promise.all(
     cardContainers.map((container, index) => {
       return new Promise((resolve) => {
-        const images = container.querySelectorAll("img:not(#cardGenerica" + (index + 1) + ")");
-        const genericImage = document.getElementById(`cardGenerica${index + 1}`);
+        const images = container.querySelectorAll(
+          "img:not(#cardGenerica" + (index + 1) + ")",
+        );
+        const genericImage = document.getElementById(
+          `cardGenerica${index + 1}`,
+        );
 
         genericImage.style.zIndex = "1";
 
@@ -492,14 +516,16 @@ async function handleGameReset() {
           }, 600);
         });
       });
-    })
+    }),
   );
 
   cardNames.forEach((name, index) => {
-    name.textContent = ["¿Conseguirás", "adivinar", "quién", "eres?"][index];
+    name.textContent = ["Can you", "guess", "who", "you are?"][index];
   });
 
-  const elementsWithEffects = document.querySelectorAll(".shadow-glow, .scale-\\[1\\.04\\]");
+  const elementsWithEffects = document.querySelectorAll(
+    ".shadow-glow, .scale-\\[1\\.04\\]",
+  );
   elementsWithEffects.forEach((element) => {
     element.classList.remove("shadow-glow", "scale-[1.04]");
   });
@@ -514,7 +540,9 @@ async function handleGameReset() {
 }
 
 function applyStylesToCurrentPlayer(playerId) {
-  const currentHighlightedElements = document.querySelectorAll(".shadow-glow.scale-\\[1\\.04\\]");
+  const currentHighlightedElements = document.querySelectorAll(
+    ".shadow-glow.scale-\\[1\\.04\\]",
+  );
   currentHighlightedElements.forEach((element) => {
     element.classList.remove("shadow-glow", "scale-[1.04]");
   });
@@ -539,28 +567,31 @@ function handleApplyCurrentRound(data) {
   applyStylesToCurrentPlayer(data.playerId);
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de manejo de puntuaciones
-//
-///////////////////////////////////////////////////
+// Scores handling section
 
 document.querySelectorAll('[id^="player"]').forEach((container) => {
   if (container.id.includes("iframe")) {
     container.parentElement.addEventListener("click", () => {
-      if (container.classList.contains("shadow-glow") && container.classList.contains("scale-[1.04]")) {
+      if (
+        container.classList.contains("shadow-glow") &&
+        container.classList.contains("scale-[1.04]")
+      ) {
         const iframeSrc = container.src;
         const urlParams = new URLSearchParams(iframeSrc.split("?")[1]);
         const playerIdVdo = urlParams.get("view");
 
         if (!playerIdVdo) {
-          console.error("No se pudo obtener el playerIdVdo del iframe.");
+          console.error("Could not get the playerIdVdo from the iframe.");
           return;
         }
 
         const playerIndex = container.id.match(/player(\d+)iframe/)[1];
-        const playerNameElement = document.getElementById(`playerName${playerIndex}`);
-        const playerName = playerNameElement ? playerNameElement.textContent : "Desconocido";
+        const playerNameElement = document.getElementById(
+          `playerName${playerIndex}`,
+        );
+        const playerName = playerNameElement
+          ? playerNameElement.textContent
+          : "Unknown";
 
         socket.emit("game:getAssignedScores", { playerIndex });
         socket.once("game:returnAssignedScores", (data) => {
@@ -606,11 +637,7 @@ function handleReturnedScore(data) {
   socket.emit("game:getSpinButtonState");
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de funciones para los botones
-//
-///////////////////////////////////////////////////
+// Button functions section
 
 document.getElementById("getPlayerLinks").addEventListener("click", () => {
   socket.emit("player:getLinks");

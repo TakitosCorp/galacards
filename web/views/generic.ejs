@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <%- include('components/head') %>
 
 <link rel="stylesheet" href="/public/css/vid.css">
@@ -65,7 +65,7 @@
 <body class="min-h-screen p-6 md:p-8 flex flex-col items-center justify-center">
   <video id="background-video" autoplay muted loop playbackRate="0.5">
     <source src="/public/vids/bg.webm" type="video/webm">
-    Tu navegador no soporta el elemento de video.
+    Your browser does not support the video tag.
   </video>
 
   <h1 class="text-5xl md:text-6xl text-white font-bold mb-10 animate-glow tracking-wider"><%= gameTitle %></h1>
@@ -79,28 +79,28 @@
         <div class="w-full h-0 pb-[133.33%] relative">
           <iframe class="absolute inset-0 w-full h-full rounded-2xl border-2 border-purple-light shadow-card transition-all duration-300 transform pointer-events-none" style="background-color: transparent;" src="" id="player1iframe"></iframe>
         </div>
-        <span id="playerName1" class="text-white text-xl md:text-2xl font-bold animate-glow mt-6 text-shadow player-name">Jugador 1</span>
+        <span id="playerName1" class="text-white text-xl md:text-2xl font-bold animate-glow mt-6 text-shadow player-name">Player 1</span>
       </div>
 
       <div class="w-full flex flex-col items-center">
         <div class="w-full h-0 pb-[133.33%] relative">
           <iframe class="absolute inset-0 w-full h-full rounded-2xl border-2 border-purple-light shadow-card transition-all duration-300 transform pointer-events-none" style="background-color: transparent;" src="" id="player2iframe"></iframe>
         </div>
-        <span id="playerName2" class="text-white text-xl md:text-2xl font-bold animate-glow mt-6 text-shadow player-name">Jugador 2</span>
+        <span id="playerName2" class="text-white text-xl md:text-2xl font-bold animate-glow mt-6 text-shadow player-name">Player 2</span>
       </div>
 
       <div class="w-full flex flex-col items-center">
         <div class="w-full h-0 pb-[133.33%] relative">
           <iframe class="absolute inset-0 w-full h-full rounded-2xl border-2 border-purple-light shadow-card transition-all duration-300 transform pointer-events-none" style="background-color: transparent;" src="" id="player3iframe"></iframe>
         </div>
-        <span id="playerName3" class="text-white text-xl md:text-2xl font-bold animate-glow mt-6 text-shadow player-name">Jugador 3</span>
+        <span id="playerName3" class="text-white text-xl md:text-2xl font-bold animate-glow mt-6 text-shadow player-name">Player 3</span>
       </div>
 
       <div class="w-full flex flex-col items-center">
         <div class="w-full h-0 pb-[133.33%] relative">
           <iframe class="absolute inset-0 w-full h-full rounded-2xl border-2 border-purple-light shadow-card transition-all duration-300 transform pointer-events-none" style="background-color: transparent;" src="" id="player4iframe"></iframe>
         </div>
-        <span id="playerName4" class="text-white text-xl md:text-2xl font-bold animate-glow mt-6 text-shadow player-name">Jugador 4</span>
+        <span id="playerName4" class="text-white text-xl md:text-2xl font-bold animate-glow mt-6 text-shadow player-name">Player 4</span>
       </div>
 
       <div class="w-full flex flex-col items-center">
@@ -114,10 +114,10 @@
 
   <div class="presentation-buttons" id="presentationButtonsContainer" style="display: none;">
     <button id="resetPresentationButton" class="presentation-button">
-      Reiniciar
+      Restart
     </button>
     <button id="nextPresentationButton" class="presentation-button">
-      Siguiente
+      Next
     </button>
   </div>
 

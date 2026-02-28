@@ -6,13 +6,15 @@ self.addEventListener("install", (event) => {
     fetch("/images")
       .then((response) => response.json())
       .then(async (imageList) => {
-        const imageUrls = imageList.map((imageName) => `/public/images/${imageName}`);
+        const imageUrls = imageList.map(
+          (imageName) => `/public/images/${imageName}`,
+        );
         const cache = await caches.open(CACHE_NAME);
         return await cache.addAll(imageUrls);
       })
       .catch((error) => {
-        console.error("Error precargando imágenes:", error);
-      })
+        console.error("Error preloading images:", error);
+      }),
   );
 });
 
@@ -27,7 +29,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (requestUrl.origin === self.location.origin && event.request.method === "GET") {
+  if (
+    requestUrl.origin === self.location.origin &&
+    event.request.method === "GET"
+  ) {
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
         if (cachedResponse) {
@@ -36,25 +41,33 @@ self.addEventListener("fetch", (event) => {
 
         return fetch(event.request)
           .then((networkResponse) => {
-            if (networkResponse && networkResponse.ok && networkResponse.status !== 206) {
+            if (
+              networkResponse &&
+              networkResponse.ok &&
+              networkResponse.status !== 206
+            ) {
               const responseClone = networkResponse.clone();
               caches.open(CACHE_NAME).then((cache) => {
                 cache.put(event.request, responseClone).catch((error) => {
-                  console.error("Error cacheando recurso:", event.request.url, error);
+                  console.error(
+                    "Error caching resource:",
+                    event.request.url,
+                    error,
+                  );
                 });
               });
             }
             return networkResponse;
           })
           .catch((error) => {
-            console.error("Error al obtener recurso:", event.request.url, error);
+            console.error("Error fetching resource:", event.request.url, error);
 
-            return new Response("Contenido no disponible", {
+            return new Response("Content not available", {
               status: 503,
-              statusText: "Servicio no disponible",
+              statusText: "Service unavailable",
             });
           });
-      })
+      }),
     );
   }
 });
@@ -68,14 +81,14 @@ self.addEventListener("activate", (event) => {
           if (!cacheWhitelist.includes(cacheName)) {
             return caches.delete(cacheName);
           }
-        })
+        }),
       );
       self.clients.matchAll({ type: "window" }).then((clients) => {
         clients.forEach((client) => {
           client.navigate(client.url);
         });
       });
-    })
+    }),
   );
   self.clients.claim();
 });

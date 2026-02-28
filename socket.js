@@ -6,14 +6,14 @@ import { readFile } from "fs/promises";
 const data = await readFile("./config/config.json", "utf-8");
 const config = JSON.parse(data);
 
-//! Inicialización del Socket
+// Socket Initialization
 async function initializeSocket(server) {
   await dbase.initializeDatabase();
   const io = new Server(server);
 
   io.use(authenticateSocket);
   io.on("connection", async (socket) => {
-    console.log(`Cliente autenticado. Auth ID: ${socket.playerId}`);
+    console.log(`Authenticated client. Auth ID: ${socket.playerId}`);
 
     handleConnection(socket, io, "connect").catch(console.error);
 
@@ -21,12 +21,12 @@ async function initializeSocket(server) {
   });
 }
 
-//! Middleware de autenticación
+// Authentication Middleware
 function authenticateSocket(socket, next) {
   let playerId = socket.handshake.auth.id;
 
   if (!playerId) {
-    console.log("Desconectando: falta el ID de autenticación");
+    console.log("Disconnecting: missing authentication ID");
     socket.disconnect(true);
     return;
   }
@@ -40,7 +40,7 @@ function authenticateSocket(socket, next) {
   const db = dbase.getDatabase();
   const player = db.data.players.find((p) => p.id === playerId);
   if (!player) {
-    console.log(`Desconectando: ID de autenticación no válido (${playerId})`);
+    console.log(`Disconnecting: invalid authentication ID (${playerId})`);
     socket.disconnect(true);
     return;
   }
@@ -49,14 +49,16 @@ function authenticateSocket(socket, next) {
   next();
 }
 
-//! Registro de eventos del Socket
-// Para todo lo que sean returns, se utilizará returnX
+// Socket event registration
+// For all returns, returnX will be used
 async function registerSocketHandlers(socket, io) {
   const playerId = socket.playerId;
 
   socket.on("general:getData", () => sendGeneralData(socket));
 
-  socket.on("player:getAllPlayersData", () => getAllPlayersData(socket, true, false));
+  socket.on("player:getAllPlayersData", () =>
+    getAllPlayersData(socket, true, false),
+  );
   socket.on("player:getLinks", async () => sendLinks(socket));
   socket.on("player:setName", async (name) => {
     handleNameChange(io, socket.playerId, name);
@@ -64,7 +66,9 @@ async function registerSocketHandlers(socket, io) {
 
   socket.on("game:reset", async () => resetGameData(io));
   socket.on("game:spin", async () => gameSpin(io));
-  socket.on("game:setAssignedScores", async (data) => handleScoreAddition(data, io));
+  socket.on("game:setAssignedScores", async (data) =>
+    handleScoreAddition(data, io),
+  );
   socket.on("game:getAssignedScores", async () => {
     const data = await dbase.getAssignedScores(playerId);
     socket.emit("game:returnAssignedScores", { assignedScores: data });
@@ -79,7 +83,7 @@ async function registerSocketHandlers(socket, io) {
       await dbase.setCurrentPlayer().then(async () => {
         const data = await dbase.getCurrentPlayer();
         io.emit("game:returnCurrentPlayer", { playerId: data });
-      })
+      }),
   );
 
   socket.on("presentation:reset", async () => {
@@ -109,12 +113,12 @@ async function registerSocketHandlers(socket, io) {
   });
 
   socket.on("disconnect", async () => {
-    console.log(`Cliente desconectado. Auth ID: ${socket.playerId}`);
+    console.log(`Disconnected client. Auth ID: ${socket.playerId}`);
     await handleConnection(socket, io, "disconnect");
   });
 }
 
-//! Funciones auxiliares del socket
+// Socket helper functions
 
 async function sendGeneralData(socket) {
   var data = await dbase.getDatabase();
@@ -146,9 +150,15 @@ async function getAllPlayersData(socket, updateVdo, isNameChange) {
   const db = dbase.getDatabase();
   const players = db.data.players;
   if (isNameChange) {
-    socket.emit("player:returnPlayerNameChange", { players: players, updateVdo: updateVdo });
+    socket.emit("player:returnPlayerNameChange", {
+      players: players,
+      updateVdo: updateVdo,
+    });
   } else {
-    socket.emit("player:returnAllPlayersData", { players: players, updateVdo: updateVdo });
+    socket.emit("player:returnAllPlayersData", {
+      players: players,
+      updateVdo: updateVdo,
+    });
   }
 }
 
@@ -185,12 +195,13 @@ async function gameSpin(socket) {
   const updatedCurrentRound = updatedData.currentRound || 1;
   const totalRounds = updatedData.totalRounds || 1;
 
-  const hasMoreRounds = updatedRemainingImages.length >= 4 && updatedCurrentRound < totalRounds;
+  const hasMoreRounds =
+    updatedRemainingImages.length >= 4 && updatedCurrentRound < totalRounds;
 
   const spinData = selected.map((finalImage, index) => {
     const fillerImages = getRandomImages(
       imageList.filter((img) => img !== finalImage),
-      15
+      15,
     );
     fillerImages[0] = previousSelectedImages[index];
     fillerImages.push(finalImage);
@@ -219,32 +230,32 @@ async function handleScoreAddition(data, socket) {
   socket.emit("game:returnScore", { playerId: playerId, score: score });
 }
 
-//! Funciones auxiliares generales
+// General helper functions
 function getRandomImages(remainingImages, count) {
   const shuffled = remainingImages.sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }
 
-//! Funciones de conexión y desconexión
+// Connection and disconnection functions
 
 async function handleConnection(socket, io, type) {
   const players = await dbase.getAllPlayers();
   if (socket.playerId !== "obs" && socket.playerId !== players[0].id) {
     const player = players.find((p) => p.id === socket.playerId);
-    const playerName = player ? player.name : "Desconocido";
+    const playerName = player ? player.name : "Unknown";
     const timestamp = Math.floor(Date.now() / 1000);
 
     if (type === "connect") {
       sendDiscordWebhook({
         url: config.djsWebhook,
-        content: `Jugador con ID ${socket.playerId} (${playerName}) se ha conectado. (Timestamp: <t:${timestamp}:T>)`,
+        content: `Player with ID ${socket.playerId} (${playerName}) has connected. (Timestamp: <t:${timestamp}:T>)`,
       }).catch(console.error);
     }
 
     if (type === "disconnect") {
       sendDiscordWebhook({
         url: config.djsWebhook,
-        content: `Jugador con ID ${socket.playerId} (${playerName}) se ha desconectado. (Timestamp: <t:${timestamp}:T>)`,
+        content: `Player with ID ${socket.playerId} (${playerName}) has disconnected. (Timestamp: <t:${timestamp}:T>)`,
       }).catch(console.error);
     }
   }

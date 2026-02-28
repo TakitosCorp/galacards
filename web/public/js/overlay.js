@@ -1,8 +1,4 @@
-////////////////////////////////////////////////////
-//
-// Sección de configuración y constantes
-//
-///////////////////////////////////////////////////
+// Configuration and constants section
 
 const queryParams = new URLSearchParams(window.location.search);
 const playerId = queryParams.get("id");
@@ -32,22 +28,14 @@ const avaliableCards = document.getElementById("avaliableCards");
 const currentRound = document.getElementById("roundNumber");
 const totalRounds = document.getElementById("totalRounds");
 
-////////////////////////////////////////////////////
-//
-// Sección de inicialización
-//
-///////////////////////////////////////////////////
+// Initialization section
 
 window.onload = () => {
   document.getElementById("background-video").playbackRate = 0.5;
   audio.loop = true;
 };
 
-////////////////////////////////////////////////////
-//
-// Sección de socket.io
-//
-///////////////////////////////////////////////////
+// socket.io section
 
 const socket = io(window.location.host, {
   auth: { id: playerId },
@@ -80,8 +68,15 @@ socket.on("game:returnGameData", (data) => {
 });
 
 socket.on("game:returnSpin", async (data) => {
-  const { spinData, selected, hasMoreRounds, currentRound, remainingImages } = data;
-  await handleSpinData(spinData, selected, hasMoreRounds, currentRound, remainingImages);
+  const { spinData, selected, hasMoreRounds, currentRound, remainingImages } =
+    data;
+  await handleSpinData(
+    spinData,
+    selected,
+    hasMoreRounds,
+    currentRound,
+    remainingImages,
+  );
 });
 
 socket.on("game:returnScore", (data) => {
@@ -96,11 +91,7 @@ socket.on("game:returnReset", async () => {
   handleGameReset();
 });
 
-////////////////////////////////////////////////////
-//
-// Sección de funciones auxiliares para el socket
-//
-///////////////////////////////////////////////////
+// Socket helper functions section
 
 function handleReturnedData(data, socket) {
   const game = data.game || {};
@@ -116,10 +107,16 @@ function handleReturnedData(data, socket) {
 
   const currentPlayerPosition = game.currentPlayer;
   if (currentPlayerPosition) {
-    const cardContainer = document.getElementById(`cardContainer${currentPlayerPosition}`);
-    const iframeContainer = document.getElementById(`player${currentPlayerPosition}iframe`);
+    const cardContainer = document.getElementById(
+      `cardContainer${currentPlayerPosition}`,
+    );
+    const iframeContainer = document.getElementById(
+      `player${currentPlayerPosition}iframe`,
+    );
 
-    const currentHighlightedCard = document.querySelector(".shadow-glow .scale-\\[1\\.04\\]");
+    const currentHighlightedCard = document.querySelector(
+      ".shadow-glow .scale-\\[1\\.04\\]",
+    );
     if (currentHighlightedCard) {
       currentHighlightedCard.classList.remove("shadow-glow", "scale-[1.04]");
     }
@@ -143,7 +140,7 @@ function handlePlayerData(players, updateVdo, socket) {
     if (updateVdo) {
       hostIframe.src = `https://vdo.ninja/?view=${hostId}&autoplay=1&controls=0&muted=1&noaudio=1&cleanoutput&codec=h264,vp8,vp9,av1&fadein&bitrate=2000`;
     }
-    hostName.textContent = players[0]?.name || "Pulpo a la gallega";
+    hostName.textContent = players[0]?.name || "Host";
   }
   pointsContainer.innerHTML = "";
 
@@ -154,7 +151,7 @@ function handlePlayerData(players, updateVdo, socket) {
     pointsContainer.innerHTML += `
     <div class="bg-purple-bg bg-opacity-50 rounded-lg p-2.5">
         <p class="text-white text-lg">
-      ${player.name}: 
+      ${player.name}:
       <span id="score-${player.id}" class="font-bold text-purple-light score-update">${player.score}</span>
         </p>
     </div>`;
@@ -176,9 +173,9 @@ function handlePlayerData(players, updateVdo, socket) {
 
   players.forEach((player) => {
     if (player.id === playerId) {
-      if (player.id === players[0].id && player.name.includes("Pulpo a la gallega")) {
+      if (player.id === players[0].id && player.name.includes("Host")) {
         promptForUsername(socket);
-      } else if (player.name.includes("Jugador")) {
+      } else if (player.name.includes("Player")) {
         promptForUsername(socket);
       }
     }
@@ -215,18 +212,16 @@ function handleGameData(game) {
   if (currentPlayer) {
     applyStylesToCurrentPlayer(currentPlayer);
   } else {
-    const currentHighlightedCard = document.querySelector(".shadow-glow .scale-\\[1\\.04\\]");
+    const currentHighlightedCard = document.querySelector(
+      ".shadow-glow .scale-\\[1\\.04\\]",
+    );
     if (currentHighlightedCard) {
       currentHighlightedCard.classList.remove("shadow-glow", "scale-[1.04]");
     }
   }
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de funciones auxiliares para el juego
-//
-///////////////////////////////////////////////////
+// Game helper functions section
 
 function createImageElement(imageName) {
   const img = document.createElement("img");
@@ -254,7 +249,9 @@ function preloadImages(imageArray) {
 }
 
 async function handleSpinData(spinData, selected) {
-  const elementsWithEffects = document.querySelectorAll(".shadow-glow, .scale-\\[1\\.04\\]");
+  const elementsWithEffects = document.querySelectorAll(
+    ".shadow-glow, .scale-\\[1\\.04\\]",
+  );
   elementsWithEffects.forEach((element) => {
     element.classList.remove("shadow-glow", "scale-[1.04]");
   });
@@ -304,14 +301,16 @@ async function handleSpinData(spinData, selected) {
         name.classList.remove("blurCardName");
         name.classList.remove("revealed");
       },
-      { once: true }
+      { once: true },
     );
   }
 }
 
 async function spinContainer(cardContainerNumber, cardContainer, reelData) {
   return new Promise((resolve) => {
-    const initialImage = document.getElementById(`cardGenerica${cardContainerNumber + 1}`);
+    const initialImage = document.getElementById(
+      `cardGenerica${cardContainerNumber + 1}`,
+    );
 
     const oldStrip = cardContainer.querySelector(".strip");
     if (oldStrip) {
@@ -342,7 +341,10 @@ async function spinContainer(cardContainerNumber, cardContainer, reelData) {
     });
 
     const tempImage = cardContainer.querySelector("img:not(.strip img)");
-    if (tempImage && tempImage.id !== `cardGenerica${cardContainerNumber + 1}`) {
+    if (
+      tempImage &&
+      tempImage.id !== `cardGenerica${cardContainerNumber + 1}`
+    ) {
       tempImage.remove();
     }
 
@@ -351,23 +353,26 @@ async function spinContainer(cardContainerNumber, cardContainer, reelData) {
     initialImage.style.position = "absolute";
 
     const interval = setInterval(() => {
-      currentPosition += imageHeight / 8; 
+      currentPosition += imageHeight / 8;
       if (currentPosition >= totalHeight) {
         currentPosition = 0;
       }
 
       strip.style.transform = `translateY(-${currentPosition}px)`;
 
-      if (currentPosition >= finalPosition - imageHeight && currentPosition <= finalPosition) {
+      if (
+        currentPosition >= finalPosition - imageHeight &&
+        currentPosition <= finalPosition
+      ) {
         clearInterval(interval);
-        strip.style.transition = "transform 0.6s ease-out"; 
+        strip.style.transition = "transform 0.6s ease-out";
         strip.style.transform = `translateY(-${finalPosition}px)`;
         setTimeout(() => {
           strip.style.transition = "none";
           resolve();
-        }, 600); 
+        }, 600);
       }
-    }, 25); 
+    }, 25);
   });
 }
 
@@ -380,8 +385,12 @@ async function handleGameReset() {
   await Promise.all(
     cardContainers.map((container, index) => {
       return new Promise((resolve) => {
-        const images = container.querySelectorAll("img:not(#cardGenerica" + (index + 1) + ")");
-        const genericImage = document.getElementById(`cardGenerica${index + 1}`);
+        const images = container.querySelectorAll(
+          "img:not(#cardGenerica" + (index + 1) + ")",
+        );
+        const genericImage = document.getElementById(
+          `cardGenerica${index + 1}`,
+        );
 
         genericImage.style.zIndex = "1";
 
@@ -421,14 +430,16 @@ async function handleGameReset() {
           }, 600);
         });
       });
-    })
+    }),
   );
 
   cardNames.forEach((name, index) => {
-    name.textContent = ["¿Conseguirás", "adivinar", "quién", "eres?"][index];
+    name.textContent = ["Can you", "guess", "who", "you are?"][index];
   });
 
-  const elementsWithEffects = document.querySelectorAll(".shadow-glow, .scale-\\[1\\.04\\]");
+  const elementsWithEffects = document.querySelectorAll(
+    ".shadow-glow, .scale-\\[1\\.04\\]",
+  );
   elementsWithEffects.forEach((element) => {
     element.classList.remove("shadow-glow", "scale-[1.04]");
   });
@@ -441,7 +452,9 @@ async function handleGameReset() {
 }
 
 function applyStylesToCurrentPlayer(playerId) {
-  const currentHighlightedElements = document.querySelectorAll(".shadow-glow.scale-\\[1\\.04\\]");
+  const currentHighlightedElements = document.querySelectorAll(
+    ".shadow-glow.scale-\\[1\\.04\\]",
+  );
   currentHighlightedElements.forEach((element) => {
     element.classList.remove("shadow-glow", "scale-[1.04]");
   });
@@ -475,7 +488,7 @@ function handleReturnedScore(data) {
       scoreElement.classList.remove("score-update");
       void scoreElement.offsetWidth;
       scoreElement.classList.add("score-update");
-      if(score !== 0){
+      if (score !== 0) {
         pointsAudio.volume = 1.0;
         pointsAudio.play();
       }

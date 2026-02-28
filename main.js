@@ -29,36 +29,43 @@ app.set("views", path.join(__dirname, "web", "views"));
 
 app.use(express.json());
 
-//! Rutas
+// Routes
 app.use("/", webRoutes);
 app.get("/error/:code", (req, res) => {
   const code = parseInt(req.params.code, 10) || 404;
-  res.status(code).render("error", { title: `${config.gameName} | Error ${code}`, errorCode: code });
+  res
+    .status(code)
+    .render("error", {
+      title: `${config.gameName} | Error ${code}`,
+      errorCode: code,
+    });
 });
 
 app.use("/public", express.static(path.join(__dirname, "web", "public")));
 
-//! Inicialización del servidor
+// Server initialization
 
-// Inicializar socket.io
+// Initialize socket.io
 initializeSocket(server);
 
-// Inicializar base de datos
+// Initialize database
 await dbase.initializeDatabase();
 
 if (process.argv.includes("resetData")) {
   await dbase.resetApp(config.gameUrl);
 }
 
-// Obtener el ID del host desde la base de datos
+// Get the host ID from the database
 const db = dbase.getDatabase();
 const hostId = db.data.players[0]?.id;
 
 server.listen(port, () => {
-  console.log(`Servidor escuchando en http://localhost:${port}`);
+  console.log(`Server listening on http://localhost:${port}`);
   if (hostId) {
-    console.log(`Controller disponible en ${config.gameUrl}/controller?id=${hostId}`);
+    console.log(
+      `Controller available at ${config.gameUrl}/controller?id=${hostId}`,
+    );
   } else {
-    console.log("No se pudo obtener el ID del host.");
+    console.log("Could not get the host ID.");
   }
 });

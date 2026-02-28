@@ -4,11 +4,7 @@ import { JSONFilePreset } from "lowdb/node";
 import fs from "fs";
 import { customAlphabet } from "nanoid";
 
-////////////////////////////////////////////////////
-//
-// Sección de configuración y constantes
-//
-///////////////////////////////////////////////////
+// Configuration and constants section
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,44 +25,39 @@ const defaultData = {
     presentation: {
       active: false,
       currentPresenter: null,
-      stage: 0, // 0: todos visibles, 1-4: jugador específico + host
+      stage: 0, // 0: all visible, 1-4: specific player + host
     },
   },
 };
 let db;
 
-// Crear un nanoid personalizado con letras y números
-const nanoid = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8);
+// Create a custom nanoid with letters and numbers
+const nanoid = customAlphabet(
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+  8,
+);
 
-////////////////////////////////////////////////////
-//
-// Sección de básicos de la base de datos
-//
-///////////////////////////////////////////////////
+// Database basics section
 
-// Inicializar la base de datos
+// Initialize the database
 export async function initializeDatabase() {
   db = await JSONFilePreset(dbFile, defaultData);
 }
 
-// Obtener la instancia de la base de datos
+// Get the database instance
 export function getDatabase() {
   return db;
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de preparación y reset de la database
-//
-///////////////////////////////////////////////////
+// Database setup and reset section
 
-// Función para resetear todo el juego
+// Function to reset the entire game
 export async function resetApp(gameBaseUrl) {
   await generateGameData();
   await generatePlayerData(gameBaseUrl);
 }
 
-// Función para generar los datos de los jugadores
+// Function to generate player data
 async function generatePlayerData(gameBaseUrl) {
   db.data.players = [];
   const hostId = nanoid();
@@ -74,7 +65,7 @@ async function generatePlayerData(gameBaseUrl) {
   const host = {
     id: hostId,
     vdoUrl: `https://vdo.ninja/?push=${hostId}&webcam&outboundvideobitrate=2000&maxvideobitrate=2000&maxbandwidth=10000&videobitrate=2000&quality=1&width=390&height=520&contenthint=motion&maxframerate=60&quality=1&stereo=1`,
-    name: "Pulpo a la gallega",
+    name: "Host",
   };
   db.data.players.push(host);
 
@@ -84,7 +75,7 @@ async function generatePlayerData(gameBaseUrl) {
       id: pId,
       playerUrl: `${gameBaseUrl}/?id=${pId}`,
       vdoUrl: `https://vdo.ninja/?push=${pId}&webcam&outboundvideobitrate=2000&maxvideobitrate=2000&maxbandwidth=10000&videobitrate=2000&quality=1&width=390&height=520&contenthint=motion&maxframerate=60&quality=1&stereo=1`,
-      name: `Jugador ${i}`,
+      name: `Player ${i}`,
       score: 0,
     };
     db.data.players.push(player);
@@ -93,13 +84,17 @@ async function generatePlayerData(gameBaseUrl) {
   await db.write();
 }
 
-// Función para generar los datos del juego
-// También servirá para reiniciar el juego
+// Function to generate game data
+// This will also be used to restart the game
 export async function generateGameData() {
   try {
     const files = await fs.promises.readdir(imageDir);
     const images = files.filter(
-      (file) => file !== "favicon.png" && file !== "LOGO.avif" && file !== "TC.avif" && file !== "GENERAL.avif"
+      (file) =>
+        file !== "favicon.png" &&
+        file !== "LOGO.avif" &&
+        file !== "TC.avif" &&
+        file !== "GENERAL.avif",
     );
     db.data.game.images = images;
     db.data.game.remainingImages = [...images];
@@ -112,8 +107,8 @@ export async function generateGameData() {
     await setAllPlayerScores(0);
     await db.write();
   } catch (err) {
-    console.error("Error leyendo el directorio de imágenes:", err);
-    throw new Error("No se pudo leer las imágenes");
+    console.error("Error reading the images directory:", err);
+    throw new Error("Could not read the images");
   }
 }
 
@@ -123,11 +118,7 @@ export async function resetAfterSpin() {
   db.write();
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de gestión de jugadores
-//
-///////////////////////////////////////////////////
+// Player management section
 
 export async function getPlayerInfo(playerId) {
   const player = db.data.players.find((p) => p.id === playerId);
@@ -150,11 +141,7 @@ export async function updatePlayerName(playerId, name) {
   }
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de gestión del juego
-//
-///////////////////////////////////////////////////
+// Game management section
 
 export async function getGameState() {
   return db.data.game || {};
@@ -172,7 +159,7 @@ export async function updateSelectedImages(selectedImages) {
 
 export async function updateRemainingImages() {
   db.data.game.remainingImages = db.data.game.remainingImages.filter(
-    (img) => !db.data.game.selectedImages.includes(img)
+    (img) => !db.data.game.selectedImages.includes(img),
   );
   await db.write();
 }
@@ -182,11 +169,8 @@ export async function updateCurrentRound() {
   await db.write();
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de gestión de las puntuaciones
-//
-///////////////////////////////////////////////////
+// Scores management section
+
 export async function addScore(playerId) {
   if (playerId === "0") {
     const actualScores = db.data.game.assignedScores || [];
@@ -240,11 +224,7 @@ export async function getAssignedScores() {
   return db.data.game.assignedScores || [];
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de gestión de los turnos
-//
-///////////////////////////////////////////////////
+// Turns management section
 
 export async function getCurrentPlayer() {
   const players = db.data.players.slice(1, 5);
@@ -276,30 +256,30 @@ export async function setCurrentPlayer() {
   await db.write();
 }
 
-////////////////////////////////////////////////////
-//
-// Sección de gestión de las presentaciones
-//
-///////////////////////////////////////////////////
+// Presentations management section
 
 export async function resetPresentation() {
-  console.log("Reiniciando presentación en el servidor");
+  console.log("Restarting presentation on the server");
   if (!db.data.game.presentation) {
     db.data.game.presentation = {};
   }
-  
+
   db.data.game.presentation.active = false;
   db.data.game.presentation.currentPresenter = null;
   db.data.game.presentation.stage = 0;
-  
+
   await db.write();
-  console.log("Presentación reiniciada: ", db.data.game.presentation);
+  console.log("Presentation restarted: ", db.data.game.presentation);
   return db.data.game.presentation;
 }
 
 export async function getPresentation() {
   if (!db.data.game.presentation) {
-    db.data.game.presentation = { active: false, currentPresenter: null, stage: 0 };
+    db.data.game.presentation = {
+      active: false,
+      currentPresenter: null,
+      stage: 0,
+    };
   } else if (db.data.game.presentation.stage === undefined) {
     db.data.game.presentation.stage = 0;
   }
@@ -326,7 +306,8 @@ export async function nextPresenter() {
 
     const playerIndex = db.data.game.presentation.stage - 1;
     if (playerIndex >= 0 && playerIndex < 4) {
-      db.data.game.presentation.currentPresenter = db.data.players[playerIndex + 1]?.id || null;
+      db.data.game.presentation.currentPresenter =
+        db.data.players[playerIndex + 1]?.id || null;
     } else {
       db.data.game.presentation.currentPresenter = null;
     }

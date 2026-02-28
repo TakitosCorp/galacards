@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <%- include('components/head') %>
 
 <link rel="stylesheet" href="/public/css/vid.css">
@@ -7,13 +7,13 @@
 <body class="min-h-screen p-6 md:p-8 flex flex-col items-center justify-center bg-purple-bg">
   <video id="background-video" autoplay muted loop playbackRate="0.5">
     <source src="/public/vids/bg.webm" type="video/webm">
-    Tu navegador no soporta el elemento de video.
+    Your browser does not support the video tag.
   </video>
 
-  <h1 class="text-5xl md:text-6xl text-white font-bold mb-10 animate-glow tracking-wider"><%= gameTitle %> - Lista de VTubers</h1>
+  <h1 class="text-5xl md:text-6xl text-white font-bold mb-10 animate-glow tracking-wider"><%= gameTitle %> - VTuber List</h1>
 
   <div id="cardGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-7xl">
-    <!-- Las cartas se renderizarán aquí dinámicamente -->
+    <!-- Cards will be rendered here dynamically -->
   </div>
 
   <script src="/public/js/list.js"></script>
