@@ -12,9 +12,9 @@
 
   <h1 class="text-5xl md:text-6xl text-white font-bold mb-10 animate-glow tracking-wider"><%= gameTitle %></h1>
 
-  <div id="slide-container" class="w-full max-w-7xl mx-auto rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm bg-opacity-90 bg-purple-bg p-4 md:p-6 text-white text-center">
-    <div id="slide-start" class="slide mx-auto w-[90%] p-4 md:p-6 text-left">
-      <h2 class="text-3xl md:text-3xl font-bold text-purple-light mb-6 text-center">Hello, welcome to!</h2>
+  <div id="slide-container" class="w-full max-w-7xl h-[70vh] mx-auto rounded-2xl shadow-2xl overflow-y-auto backdrop-blur-sm bg-purple-bg/40 flex flex-col justify-center p-6 md:p-8 text-white text-center">
+    <div id="slide-start" class="slide mx-auto w-full md:w-[90%] text-left">
+      <h2 class="text-3xl md:text-4xl font-bold text-purple-light mb-6 text-center">Hello, welcome to!</h2>
       <p class="text-lg md:text-xl text-purple-hover mb-4 text-center">
         Welcome to a special edition of "Who am I?" with a unique twist: all characters are VTubers! Each player will have a turn to ask questions and figure out which VTuber they've been assigned. But beware, you only have two attempts to guess, so choose your questions wisely!
       </p>
@@ -26,8 +26,9 @@
         LET'S PLAY! <span class="text-pink-400">&lt;3</span>
       </p>
     </div>
-    <div id="slide-end" class="slide hidden mx-auto w-[90%] p-4 md:p-6">
-      <h2 class="text-3xl md:text-3xl font-bold text-purple-light mb-6 text-center">Game Rules</h2>
+    
+    <div id="slide-end" class="slide hidden mx-auto w-full md:w-[90%]">
+      <h2 class="text-3xl md:text-4xl font-bold text-purple-light mb-6 text-center">Game Rules</h2>
       <div class="text-center mx-auto max-w-6xl text-purple-hover space-y-4 text-sm md:text-xl">
         <p>On each turn, you can only ask one question to try to figure out who you are.</p>
         <p>It is not allowed to abuse "trick" questions that may break the game dynamics.</p>
@@ -41,10 +42,10 @@
     </div>
 
     <!-- Navigation Controls -->
-    <div class="mt-6 flex gap-4 justify-center">
-      <button id="prev-btn" class="px-4 py-2 bg-purple-light text-white rounded disabled:opacity-50 hover:bg-purple-hover" disabled>Previous</button>
-      <button id="next-btn" class="px-4 py-2 bg-purple-light text-white rounded hover:bg-purple-hover">Next</button>
-      <button id="vamos-btn" class="px-4 py-2 bg-pink-400 text-white rounded hidden">Let's go!</button>
+    <div class="mt-8 flex gap-4 justify-center">
+      <button id="prev-btn" class="px-6 py-2 bg-purple-light text-white font-bold rounded-lg shadow-md disabled:opacity-50 hover:bg-purple-hover transition-colors duration-300" disabled>Previous</button>
+      <button id="next-btn" class="px-6 py-2 bg-purple-light text-white font-bold rounded-lg shadow-md hover:bg-purple-hover transition-colors duration-300">Next</button>
+      <button id="vamos-btn" class="px-6 py-2 bg-pink-400 text-white font-bold rounded-lg shadow-md hidden hover:bg-pink-500 transition-colors duration-300">Let's go!</button>
     </div>
   </div>
 

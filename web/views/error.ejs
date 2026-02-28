@@ -2,37 +2,42 @@
 <html lang="en">
 <%- include('components/head') %>
 
-<body class="min-h-screen p-10 md:p-16 flex flex-col items-center justify-center bg-gradient-to-b from-[#2a1e37] to-[#221824]">
+<link rel="stylesheet" href="/public/css/vid.css">
+
+<body class="min-h-screen p-6 md:p-8 flex flex-col items-center justify-center">
+  <video id="background-video" autoplay muted loop playbackRate="0.5">
+    <source src="/public/vids/bg.webm" type="video/webm">
+    Your browser does not support the video tag.
+  </video>
+
   <h1 class="text-5xl md:text-6xl text-white font-bold mb-10 animate-glow tracking-wider">Who am I?</h1>
 
-  <div class="w-full max-w-7xl mx-auto rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm">
-    <div class="p-6 md:p-8 bg-purple-bg rounded-2xl">
-      <% if (errorCode === 400) { %>
-      <h2 class="text-3xl text-purple-light font-bold mb-4">Error 400: Bad Request</h2>
-      <p class="text-white text-lg">The cat doesn't understand your request. Are you sure everything is typed correctly? 🐾❓</p>
-      <img src="https://http.cat/400.jpg" alt="Error 400 cat" class="mt-4 rounded-lg shadow-lg border-2 border-purple-light">
-      <% } else if (errorCode === 401) { %>
-      <h2 class="text-3xl text-purple-light font-bold mb-4">Error 401: Unauthorized</h2>
-      <p class="text-white text-lg">This kitty won't let you pass. Maybe some tuna will convince them. 🐾🚫</p>
-      <img src="https://http.cat/401.jpg" alt="Error 401 cat" class="mt-4 rounded-lg shadow-lg border-2 border-purple-light">
-      <% } else if (errorCode === 403) { %>
-      <h2 class="text-3xl text-purple-light font-bold mb-4">Error 403: Forbidden</h2>
-      <p class="text-white text-lg">This kitty says you don't have permission to enter. Better not insist. 🐱🚧</p>
-      <img src="https://http.cat/403.jpg" alt="Error 403 cat" class="mt-4 rounded-lg shadow-lg border-2 border-purple-light">
-      <% } else if (errorCode === 404) { %>
-      <h2 class="text-3xl text-purple-light font-bold mb-4">Error 404: Not Found</h2>
-      <p class="text-white text-lg">The cat searched everywhere, but found nothing. Maybe it's in another corner. 🐱🔍</p>
-      <img src="https://http.cat/404.jpg" alt="Error 404 cat" class="mt-4 rounded-lg shadow-lg border-2 border-purple-light">
-      <% } else if (errorCode === 500) { %>
-      <h2 class="text-3xl text-purple-light font-bold mb-4">Error 500: Internal Server Error</h2>
-      <p class="text-white text-lg">The cat is trying to fix it, but seems to need a nap. 🐾💤</p>
-      <img src="https://http.cat/500.jpg" alt="Error 500 cat" class="mt-4 rounded-lg shadow-lg border-2 border-purple-light">
-      <% } else { %>
-      <h2 class="text-3xl text-purple-light font-bold mb-4">Unknown Error</h2>
-      <p class="text-white text-lg">The kitty doesn't know what happened, but is here to comfort you. 😽❓</p>
-      <img src="https://http.cat/520.jpg" alt="Unknown Error cat" class="mt-4 rounded-lg shadow-lg border-2 border-purple-light">
-      <% } %>
-    </div>
+  <div class="w-full max-w-7xl h-[70vh] mx-auto rounded-2xl shadow-2xl overflow-y-auto backdrop-blur-sm bg-purple-bg/40 flex flex-col items-center justify-center p-6 md:p-8 text-center">
+    <% if (errorCode === 400) { %>
+    <h2 class="text-3xl text-purple-light font-bold mb-4">Error 400: Bad Request</h2>
+    <p class="text-white text-lg">The cat doesn't understand your request. Are you sure everything is typed correctly? 🐾❓</p>
+    <img src="https://http.cat/400.jpg" alt="Error 400 cat" class="mt-6 rounded-lg shadow-lg border-2 border-purple-light max-w-md w-full">
+    <% } else if (errorCode === 401) { %>
+    <h2 class="text-3xl text-purple-light font-bold mb-4">Error 401: Unauthorized</h2>
+    <p class="text-white text-lg">This kitty won't let you pass. Maybe some tuna will convince them. 🐾🚫</p>
+    <img src="https://http.cat/401.jpg" alt="Error 401 cat" class="mt-6 rounded-lg shadow-lg border-2 border-purple-light max-w-md w-full">
+    <% } else if (errorCode === 403) { %>
+    <h2 class="text-3xl text-purple-light font-bold mb-4">Error 403: Forbidden</h2>
+    <p class="text-white text-lg">This kitty says you don't have permission to enter. Better not insist. 🐱🚧</p>
+    <img src="https://http.cat/403.jpg" alt="Error 403 cat" class="mt-6 rounded-lg shadow-lg border-2 border-purple-light max-w-md w-full">
+    <% } else if (errorCode === 404) { %>
+    <h2 class="text-3xl text-purple-light font-bold mb-4">Error 404: Not Found</h2>
+    <p class="text-white text-lg">The cat searched everywhere, but found nothing. Maybe it's in another corner. 🐱🔍</p>
+    <img src="https://http.cat/404.jpg" alt="Error 404 cat" class="mt-6 rounded-lg shadow-lg border-2 border-purple-light max-w-md w-full">
+    <% } else if (errorCode === 500) { %>
+    <h2 class="text-3xl text-purple-light font-bold mb-4">Error 500: Internal Server Error</h2>
+    <p class="text-white text-lg">The cat is trying to fix it, but seems to need a nap. 🐾💤</p>
+    <img src="https://http.cat/500.jpg" alt="Error 500 cat" class="mt-6 rounded-lg shadow-lg border-2 border-purple-light max-w-md w-full">
+    <% } else { %>
+    <h2 class="text-3xl text-purple-light font-bold mb-4">Unknown Error</h2>
+    <p class="text-white text-lg">The kitty doesn't know what happened, but is here to comfort you. 😿❓</p>
+    <img src="https://http.cat/520.jpg" alt="Unknown Error cat" class="mt-6 rounded-lg shadow-lg border-2 border-purple-light max-w-md w-full">
+    <% } %>
   </div>
 
   <%- include('components/scripts') %>
