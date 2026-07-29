@@ -28,7 +28,10 @@ const isValidId = (req, res, next) => {
     return next();
   }
 
-  warn("Invalid ID '{userId}' for route {path}", "Auth", { userId, path: req.path });
+  warn("Invalid ID '{userId}' for route {path}", "Auth", {
+    userId,
+    path: req.path,
+  });
   return res.redirect("/error/401");
 };
 
@@ -46,7 +49,10 @@ const isHost = (req, res, next) => {
     return next();
   }
 
-  warn("Forbidden access for ID '{userId}' on host route {path}", "Auth", { userId, path: req.path });
+  warn("Forbidden access for ID '{userId}' on host route {path}", "Auth", {
+    userId,
+    path: req.path,
+  });
   return res.redirect("/error/403");
 };
 
@@ -64,7 +70,10 @@ const isHostOrPlayer = (req, res, next) => {
     return next();
   }
 
-  warn("Forbidden access for ID '{userId}' on player route {path}", "Auth", { userId, path: req.path });
+  warn("Forbidden access for ID '{userId}' on player route {path}", "Auth", {
+    userId,
+    path: req.path,
+  });
   return res.redirect("/error/403");
 };
 
@@ -121,7 +130,12 @@ router.get("/images", (req, res) => {
   const imageDir = path.join(__dirname, "..", "web", "public", "images");
   fs.readdir(imageDir, (err, files) => {
     if (err) {
-      error("Error reading the images directory: {error}", "FS", { error: err.message }, { error: err });
+      error(
+        "Error reading the images directory: {error}",
+        "FS",
+        { error: err.message },
+        { error: err },
+      );
       return res.status(500).json({ error: "Could not read the images" });
     }
 

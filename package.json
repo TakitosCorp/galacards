@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node main.js",
     "dev": "npx nodemon --ignore data main.js",
-    "devReset": "npx nodemon --ignore data main.js resetData"
+    "devReset": "npx nodemon --ignore data main.js resetData",
+    "format": "prettier --write ."
   },
   "author": "AlexDeveloperUwU",
   "dependencies": {
@@ -20,5 +21,8 @@
     "socket.io": "^4.8.1",
     "uuid": "^11.1.0",
     "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6"
   }
 }

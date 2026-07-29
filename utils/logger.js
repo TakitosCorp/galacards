@@ -36,14 +36,29 @@ const logger = winston.createLogger({
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.printf(({ timestamp, level, message, tag, service, environment, hostname, pid, nodeVersion, platform, ...meta }) => {
-          // Interpolate for human-readable console (SEQ gets raw template + structured properties)
-          const rendered = interpolate(message, meta);
-          const infoBlock = `[${environment}|${hostname}|${service}]`;
-          const tagBlock = tag ? ` [${tag}]` : "";
-          const metaStr = Object.keys(meta).length > 1 ? ` ${JSON.stringify(meta)}` : "";
-          return `${timestamp} [${level}] ${infoBlock}${tagBlock} ${rendered}${metaStr}`.trim();
-        }),
+        winston.format.printf(
+          ({
+            timestamp,
+            level,
+            message,
+            tag,
+            service,
+            environment,
+            hostname,
+            pid,
+            nodeVersion,
+            platform,
+            ...meta
+          }) => {
+            // Interpolate for human-readable console (SEQ gets raw template + structured properties)
+            const rendered = interpolate(message, meta);
+            const infoBlock = `[${environment}|${hostname}|${service}]`;
+            const tagBlock = tag ? ` [${tag}]` : "";
+            const metaStr =
+              Object.keys(meta).length > 1 ? ` ${JSON.stringify(meta)}` : "";
+            return `${timestamp} [${level}] ${infoBlock}${tagBlock} ${rendered}${metaStr}`.trim();
+          },
+        ),
       ),
     }),
     // SEQ transport (conditional)
@@ -96,14 +111,10 @@ export function createTaggedLogger(tag) {
   return {
     log: (level, message, params, context) =>
       log(level, message, tag, params, context),
-    error: (message, params, context) =>
-      error(message, tag, params, context),
-    warn: (message, params, context) =>
-      warn(message, tag, params, context),
-    info: (message, params, context) =>
-      info(message, tag, params, context),
-    debug: (message, params, context) =>
-      debug(message, tag, params, context),
+    error: (message, params, context) => error(message, tag, params, context),
+    warn: (message, params, context) => warn(message, tag, params, context),
+    info: (message, params, context) => info(message, tag, params, context),
+    debug: (message, params, context) => debug(message, tag, params, context),
   };
 }
 

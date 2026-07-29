@@ -47,7 +47,12 @@ async function safeDbWrite(retries = 3, delayMs = 100) {
         await new Promise((res) => setTimeout(res, delayMs));
         continue;
       }
-      error("Critical write error: {error}", "DB", { error: err.message }, { error: err });
+      error(
+        "Critical write error: {error}",
+        "DB",
+        { error: err.message },
+        { error: err },
+      );
       throw err;
     }
   }
@@ -129,7 +134,12 @@ export async function generateGameData() {
     await setAllPlayerScores(0);
     await safeDbWrite();
   } catch (err) {
-    error("Error reading the images directory: {error}", "DB", { error: err.message }, { error: err });
+    error(
+      "Error reading the images directory: {error}",
+      "DB",
+      { error: err.message },
+      { error: err },
+    );
     throw new Error("Could not read the images");
   }
 }
@@ -162,7 +172,12 @@ export async function updatePlayerName(playerId, name) {
     try {
       await safeDbWrite();
     } catch (err) {
-      error("Failed to update player name for {playerId}: {error}", "DB", { playerId, error: err.message }, { error: err, playerId });
+      error(
+        "Failed to update player name for {playerId}: {error}",
+        "DB",
+        { playerId, error: err.message },
+        { error: err, playerId },
+      );
       throw err;
     }
   }
@@ -296,7 +311,12 @@ export async function resetPresentation() {
   db.data.game.presentation.stage = 0;
 
   await safeDbWrite();
-  debug("Presentation restarted", "DB", {}, { presentation: db.data.game.presentation });
+  debug(
+    "Presentation restarted",
+    "DB",
+    {},
+    { presentation: db.data.game.presentation },
+  );
   return db.data.game.presentation;
 }
 

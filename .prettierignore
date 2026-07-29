@@ -1,2 +1,5 @@
+data/
+config/
+node_modules/
 web/public/js/swal.js
 web/public/js/tcss.js

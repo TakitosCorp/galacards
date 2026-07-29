@@ -20,7 +20,8 @@ if (!fs.existsSync(configPath)) {
     gameUrl: "http://localhost:3000",
     gamePort: 3000,
     gameName: "¿Who am I?",
-    djsWebhook: "https://discord.com/api/webhooks/1364207884082352189/3SJfwB7OMOhAfIkHWDdBF85h0HUFtyHu2lRMEtd2tLBmuUFTqDb66EKWqvw3Sb76ubxL",
+    djsWebhook:
+      "https://discord.com/api/webhooks/1364207884082352189/3SJfwB7OMOhAfIkHWDdBF85h0HUFtyHu2lRMEtd2tLBmuUFTqDb66EKWqvw3Sb76ubxL",
     enableList: true,
     seq: {
       enabled: true,
@@ -86,9 +87,19 @@ const db = dbase.getDatabase();
 const hostId = db.data.players[0]?.id;
 
 server.listen(port, () => {
-  log("info", "Server listening on http://localhost:{port}", "Server", { port });
+  log("info", "Server listening on http://localhost:{port}", "Server", {
+    port,
+  });
   if (hostId) {
-    log("info", "Controller available at {url}/controller?id={hostId}", "Server", { url: config.gameUrl, hostId });
+    log(
+      "info",
+      "Controller available at {url}/controller?id={hostId}",
+      "Server",
+      {
+        url: config.gameUrl,
+        hostId,
+      },
+    );
   } else {
     warn("Could not get the host ID.", "Server");
   }

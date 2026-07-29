@@ -14,10 +14,16 @@ async function initializeSocket(server) {
 
   io.use(authenticateSocket);
   io.on("connection", async (socket) => {
-    info("Authenticated client. Auth ID: {playerId}", { playerId: socket.playerId });
+    info("Authenticated client. Auth ID: {playerId}", {
+      playerId: socket.playerId,
+    });
 
     handleConnection(socket, io, "connect").catch((err) =>
-      error("Connection handler failed: {error}", { error: err.message }, { error: err, playerId: socket.playerId })
+      error(
+        "Connection handler failed: {error}",
+        { error: err.message },
+        { error: err, playerId: socket.playerId },
+      ),
     );
 
     registerSocketHandlers(socket, io);
@@ -116,7 +122,9 @@ async function registerSocketHandlers(socket, io) {
   });
 
   socket.on("disconnect", async () => {
-    info("Disconnected client. Auth ID: {playerId}", { playerId: socket.playerId });
+    info("Disconnected client. Auth ID: {playerId}", {
+      playerId: socket.playerId,
+    });
     await handleConnection(socket, io, "disconnect");
   });
 }
@@ -253,7 +261,11 @@ async function handleConnection(socket, io, type) {
         url: config.djsWebhook,
         content: `Player with ID ${socket.playerId} (${playerName}) has connected. (Timestamp: <t:${timestamp}:T>)`,
       }).catch((err) =>
-        error("Discord webhook failed (connect): {error}", { error: err.message }, { error: err, playerId: socket.playerId })
+        error(
+          "Discord webhook failed (connect): {error}",
+          { error: err.message },
+          { error: err, playerId: socket.playerId },
+        ),
       );
     }
 
@@ -262,7 +274,11 @@ async function handleConnection(socket, io, type) {
         url: config.djsWebhook,
         content: `Player with ID ${socket.playerId} (${playerName}) has disconnected. (Timestamp: <t:${timestamp}:T>)`,
       }).catch((err) =>
-        error("Discord webhook failed (disconnect): {error}", { error: err.message }, { error: err, playerId: socket.playerId })
+        error(
+          "Discord webhook failed (disconnect): {error}",
+          { error: err.message },
+          { error: err, playerId: socket.playerId },
+        ),
       );
     }
   }
