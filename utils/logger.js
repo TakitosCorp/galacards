@@ -1,6 +1,7 @@
 import winston from "winston";
 import { SeqTransport } from "@datalust/winston-seq";
 import { readFile } from "fs/promises";
+import os from "os";
 
 // Lightweight interpolation for console display only
 // SEQ receives the raw template + properties for structured rendering
@@ -25,17 +26,23 @@ const logger = winston.createLogger({
   defaultMeta: {
     service: "galacards",
     environment: process.env.NODE_ENV || "development",
+    hostname: os.hostname(),
+    pid: process.pid,
+    nodeVersion: process.version,
+    platform: process.platform,
   },
   transports: [
     // Console transport (always on, for local dev)
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.printf(({ timestamp, level, message, tag, service, environment, ...meta }) => {
+        winston.format.printf(({ timestamp, level, message, tag, service, environment, hostname, pid, nodeVersion, platform, ...meta }) => {
           // Interpolate for human-readable console (SEQ gets raw template + structured properties)
           const rendered = interpolate(message, meta);
-          const metaStr = Object.keys(meta).length > 1 ? JSON.stringify(meta) : "";
-          return `${timestamp} [${level}] ${rendered} ${metaStr}`.trim();
+          const infoBlock = `[${environment}|${hostname}|${service}]`;
+          const tagBlock = tag ? ` [${tag}]` : "";
+          const metaStr = Object.keys(meta).length > 1 ? ` ${JSON.stringify(meta)}` : "";
+          return `${timestamp} [${level}] ${infoBlock}${tagBlock} ${rendered}${metaStr}`.trim();
         }),
       ),
     }),

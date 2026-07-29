@@ -9,7 +9,33 @@ import * as dbase from "./utils/db.js";
 import { readFile } from "fs/promises";
 import { log, warn } from "./utils/logger.js";
 
-const data = await readFile("./config/config.json", "utf-8");
+const configDir = path.join(__dirname, "config");
+if (!fs.existsSync(configDir)) {
+  fs.mkdirSync(configDir);
+}
+
+const configPath = path.join(configDir, "config.json");
+if (!fs.existsSync(configPath)) {
+  const defaultConfig = {
+    gameUrl: "http://localhost:3000",
+    gamePort: 3000,
+    gameName: "¿Who am I?",
+    djsWebhook: "https://discord.com/api/webhooks/1364207884082352189/3SJfwB7OMOhAfIkHWDdBF85h0HUFtyHu2lRMEtd2tLBmuUFTqDb66EKWqvw3Sb76ubxL",
+    enableList: true,
+    seq: {
+      enabled: true,
+      serverUrl: "http://localhost:5341",
+      apiKey: "",
+    },
+    logging: {
+      level: "debug",
+    },
+  };
+  fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
+  log("info", "Generated default config file at config/config.json", "Config");
+}
+
+const data = await readFile(configPath, "utf-8");
 const config = JSON.parse(data);
 
 const __filename = fileURLToPath(import.meta.url);
