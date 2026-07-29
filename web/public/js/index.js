@@ -2,7 +2,6 @@ const queryParams = new URLSearchParams(window.location.search);
 const playerId = queryParams.get("id");
 
 window.onload = () => {
-  console.log("[Intro] Initializing GalaGaoo Collab Onboarding.");
   document.getElementById("background-video").playbackRate = 0.5;
 
   const totalSlides = 3;
@@ -65,7 +64,6 @@ window.onload = () => {
   };
 
   document.getElementById("vamos-btn").onclick = () => {
-    console.log("[Intro] Navigation triggered to player view.");
     window.location.href = `/player?id=${playerId}`;
   };
 

@@ -237,7 +237,7 @@ async function fetchImages() {
     const imageArray = await response.json();
     preloadImages(imageArray);
   } catch (error) {
-    console.error("Failed to fetch images:", error);
+    // Image fetch error - silently fail
   }
 }
 
@@ -496,7 +496,7 @@ function handleReturnedScore(data) {
         scoreElement.classList.remove("score-update");
       }, 500);
     } else {
-      console.warn(`Score element for player ${playerId} not found.`);
+      // Score element not found
     }
   }
 }

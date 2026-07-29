@@ -9,3 +9,5 @@ data
 /config/config.json
 concat.ps1
 full_project_context.md
+CLAUDE.md
+config/

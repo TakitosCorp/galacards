@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 import { JSONFilePreset } from "lowdb/node";
 import fs from "fs";
 import { customAlphabet } from "nanoid";
+import { error, warn, debug } from "./logger.js";
 
 // Configuration and constants section
 
@@ -39,13 +40,14 @@ async function safeDbWrite(retries = 3, delayMs = 100) {
       return;
     } catch (err) {
       if (err.code === "EPERM" && attempt < retries) {
-        console.warn(
-          `[DB] EPERM error on write, retrying (${attempt}/${retries})...`,
-        );
+        warn("EPERM error on write, retrying ({attempt}/{retries})...", "DB", {
+          attempt,
+          retries,
+        });
         await new Promise((res) => setTimeout(res, delayMs));
         continue;
       }
-      console.error(`[DB] Critical write error:`, err);
+      error("Critical write error: {error}", "DB", { error: err.message }, { error: err });
       throw err;
     }
   }
@@ -127,7 +129,7 @@ export async function generateGameData() {
     await setAllPlayerScores(0);
     await safeDbWrite();
   } catch (err) {
-    console.error("Error reading the images directory:", err);
+    error("Error reading the images directory: {error}", "DB", { error: err.message }, { error: err });
     throw new Error("Could not read the images");
   }
 }
@@ -153,14 +155,14 @@ export async function getAllPlayers() {
 }
 
 export async function updatePlayerName(playerId, name) {
-  console.log("[DB] Updating player name:", playerId, name);
+  debug("Updating player name: {playerId} -> {name}", "DB", { playerId, name });
   const player = db.data.players.find((p) => p.id === playerId);
   if (player) {
     player.name = typeof name === "string" ? name : player.name;
     try {
       await safeDbWrite();
     } catch (err) {
-      console.error(`[DB] Failed to update player name for ${playerId}:`, err);
+      error("Failed to update player name for {playerId}: {error}", "DB", { playerId, error: err.message }, { error: err, playerId });
       throw err;
     }
   }
@@ -284,7 +286,7 @@ export async function setCurrentPlayer() {
 // Presentations management section
 
 export async function resetPresentation() {
-  console.log("Restarting presentation on the server");
+  debug("Restarting presentation on the server", "DB");
   if (!db.data.game.presentation) {
     db.data.game.presentation = {};
   }
@@ -294,7 +296,7 @@ export async function resetPresentation() {
   db.data.game.presentation.stage = 0;
 
   await safeDbWrite();
-  console.log("Presentation restarted: ", db.data.game.presentation);
+  debug("Presentation restarted", "DB", {}, { presentation: db.data.game.presentation });
   return db.data.game.presentation;
 }
 

@@ -37,12 +37,10 @@ window.onload = () => {
 
   document.addEventListener("copy", (e) => {
     e.preventDefault();
-    console.warn("Copy functionality is disabled.");
   });
 
   document.addEventListener("contextmenu", (e) => {
     e.preventDefault();
-    console.warn("Right-click is disabled.");
   });
 
   document.addEventListener("keydown", (e) => {
@@ -57,20 +55,16 @@ window.onload = () => {
       e.key === "F5" // F5
     ) {
       e.preventDefault();
-      console.warn("Developer tools and page reload are disabled.");
     }
   });
 
   document.addEventListener("selectstart", (e) => {
     e.preventDefault();
-    console.warn("Text selection is disabled.");
   });
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
-      console.warn(
-        "Page visibility change detected. Reload prevention active.",
-      );
+      // Reload prevention active
     }
   });
 };
@@ -345,7 +339,7 @@ async function fetchImages() {
     const imageArray = await response.json();
     preloadImages(imageArray);
   } catch (error) {
-    console.error("Failed to fetch images:", error);
+    // Image fetch error - silently fail
   }
 }
 
@@ -607,7 +601,6 @@ function handleReturnedScore(data) {
   socket.once("game:returnAssignedScores", (assignedScores) => {
     const playerNameElement = cardNames[playerPosition - 1];
     const { playerId: playerAuth, score } = data;
-    console.log(data);
     const scoreElement = document.getElementById(`score-${playerAuth}`);
     if (scoreElement || playerAuth === "0") {
       if (scoreElement) {
@@ -653,7 +646,7 @@ function handleReturnedScore(data) {
         }
       }
     } else {
-      console.warn(`Score element for player ${playerId} not found.`);
+      // Score element not found
     }
   });
 }

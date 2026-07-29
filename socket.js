@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import * as dbase from "./utils/db.js";
 import { sendDiscordWebhook } from "send-discord-webhook";
 import { readFile } from "fs/promises";
+import { info, error } from "./utils/logger.js";
 
 const data = await readFile("./config/config.json", "utf-8");
 const config = JSON.parse(data);
@@ -13,9 +14,11 @@ async function initializeSocket(server) {
 
   io.use(authenticateSocket);
   io.on("connection", async (socket) => {
-    console.log(`Authenticated client. Auth ID: ${socket.playerId}`);
+    info("Authenticated client. Auth ID: {playerId}", { playerId: socket.playerId });
 
-    handleConnection(socket, io, "connect").catch(console.error);
+    handleConnection(socket, io, "connect").catch((err) =>
+      error("Connection handler failed: {error}", { error: err.message }, { error: err, playerId: socket.playerId })
+    );
 
     registerSocketHandlers(socket, io);
   });
@@ -26,7 +29,7 @@ function authenticateSocket(socket, next) {
   let playerId = socket.handshake.auth.id;
 
   if (!playerId) {
-    console.log("Disconnecting: missing authentication ID");
+    info("Disconnecting: missing authentication ID");
     socket.disconnect(true);
     return;
   }
@@ -40,7 +43,7 @@ function authenticateSocket(socket, next) {
   const db = dbase.getDatabase();
   const player = db.data.players.find((p) => p.id === playerId);
   if (!player) {
-    console.log(`Disconnecting: invalid authentication ID (${playerId})`);
+    info("Disconnecting: invalid authentication ID ({playerId})", { playerId });
     socket.disconnect(true);
     return;
   }
@@ -113,7 +116,7 @@ async function registerSocketHandlers(socket, io) {
   });
 
   socket.on("disconnect", async () => {
-    console.log(`Disconnected client. Auth ID: ${socket.playerId}`);
+    info("Disconnected client. Auth ID: {playerId}", { playerId: socket.playerId });
     await handleConnection(socket, io, "disconnect");
   });
 }
@@ -249,14 +252,18 @@ async function handleConnection(socket, io, type) {
       sendDiscordWebhook({
         url: config.djsWebhook,
         content: `Player with ID ${socket.playerId} (${playerName}) has connected. (Timestamp: <t:${timestamp}:T>)`,
-      }).catch(console.error);
+      }).catch((err) =>
+        error("Discord webhook failed (connect): {error}", { error: err.message }, { error: err, playerId: socket.playerId })
+      );
     }
 
     if (type === "disconnect") {
       sendDiscordWebhook({
         url: config.djsWebhook,
         content: `Player with ID ${socket.playerId} (${playerName}) has disconnected. (Timestamp: <t:${timestamp}:T>)`,
-      }).catch(console.error);
+      }).catch((err) =>
+        error("Discord webhook failed (disconnect): {error}", { error: err.message }, { error: err, playerId: socket.playerId })
+      );
     }
   }
 }

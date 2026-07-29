@@ -13,7 +13,7 @@ self.addEventListener("install", (event) => {
         return await cache.addAll(imageUrls);
       })
       .catch((error) => {
-        console.error("Error preloading images:", error);
+        // Image preload error - silently fail
       }),
   );
 });
@@ -49,19 +49,13 @@ self.addEventListener("fetch", (event) => {
               const responseClone = networkResponse.clone();
               caches.open(CACHE_NAME).then((cache) => {
                 cache.put(event.request, responseClone).catch((error) => {
-                  console.error(
-                    "Error caching resource:",
-                    event.request.url,
-                    error,
-                  );
+                  // Cache put error - silently fail
                 });
               });
             }
             return networkResponse;
           })
           .catch((error) => {
-            console.error("Error fetching resource:", event.request.url, error);
-
             return new Response("Content not available", {
               status: 503,
               statusText: "Service unavailable",

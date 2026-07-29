@@ -4,6 +4,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import { readFile } from "fs/promises";
 import { getDatabase } from "../utils/db.js";
+import { warn, error } from "../utils/logger.js";
 
 const data = await readFile("./config/config.json", "utf-8");
 const config = JSON.parse(data);
@@ -19,7 +20,7 @@ const isValidId = (req, res, next) => {
   const userId = req.query.id;
 
   if (!userId) {
-    console.warn(`[Auth] Missing ID for route ${req.path}`);
+    warn("Missing ID for route {path}", "Auth", { path: req.path });
     return res.redirect("/error/401");
   }
 
@@ -27,7 +28,7 @@ const isValidId = (req, res, next) => {
     return next();
   }
 
-  console.warn(`[Auth] Invalid ID '${userId}' for route ${req.path}`);
+  warn("Invalid ID '{userId}' for route {path}", "Auth", { userId, path: req.path });
   return res.redirect("/error/401");
 };
 
@@ -37,7 +38,7 @@ const isHost = (req, res, next) => {
   const userId = req.query.id;
 
   if (!userId) {
-    console.warn(`[Auth] Missing ID for host route ${req.path}`);
+    warn("Missing ID for host route {path}", "Auth", { path: req.path });
     return res.redirect("/error/401");
   }
 
@@ -45,9 +46,7 @@ const isHost = (req, res, next) => {
     return next();
   }
 
-  console.warn(
-    `[Auth] Forbidden access for ID '${userId}' on host route ${req.path}`,
-  );
+  warn("Forbidden access for ID '{userId}' on host route {path}", "Auth", { userId, path: req.path });
   return res.redirect("/error/403");
 };
 
@@ -57,7 +56,7 @@ const isHostOrPlayer = (req, res, next) => {
   const userId = req.query.id;
 
   if (!userId) {
-    console.warn(`[Auth] Missing ID for player route ${req.path}`);
+    warn("Missing ID for player route {path}", "Auth", { path: req.path });
     return res.redirect("/error/401");
   }
 
@@ -65,9 +64,7 @@ const isHostOrPlayer = (req, res, next) => {
     return next();
   }
 
-  console.warn(
-    `[Auth] Forbidden access for ID '${userId}' on player route ${req.path}`,
-  );
+  warn("Forbidden access for ID '{userId}' on player route {path}", "Auth", { userId, path: req.path });
   return res.redirect("/error/403");
 };
 
@@ -124,7 +121,7 @@ router.get("/images", (req, res) => {
   const imageDir = path.join(__dirname, "..", "web", "public", "images");
   fs.readdir(imageDir, (err, files) => {
     if (err) {
-      console.error("[FS] Error reading the images directory:", err);
+      error("Error reading the images directory: {error}", "FS", { error: err.message }, { error: err });
       return res.status(500).json({ error: "Could not read the images" });
     }
 

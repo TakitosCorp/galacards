@@ -27,6 +27,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       cardGrid.appendChild(cardElement);
     });
   } catch (error) {
-    console.error("[List] Error loading images:", error);
+    // Image loading error - silently fail
   }
 });

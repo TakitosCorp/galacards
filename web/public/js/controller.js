@@ -308,7 +308,7 @@ async function fetchImages() {
     const imageArray = await response.json();
     preloadImages(imageArray);
   } catch (error) {
-    console.error("Failed to fetch images:", error);
+    // Image fetch error - silently fail
   }
 }
 
@@ -581,7 +581,7 @@ document.querySelectorAll('[id^="player"]').forEach((container) => {
         const playerIdVdo = urlParams.get("view");
 
         if (!playerIdVdo) {
-          console.error("Could not get the playerIdVdo from the iframe.");
+          // Missing playerIdVdo from iframe
           return;
         }
 

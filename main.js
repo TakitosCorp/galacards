@@ -7,6 +7,7 @@ import webRoutes from "./routes/web.js";
 import initializeSocket from "./socket.js";
 import * as dbase from "./utils/db.js";
 import { readFile } from "fs/promises";
+import { log, warn } from "./utils/logger.js";
 
 const data = await readFile("./config/config.json", "utf-8");
 const config = JSON.parse(data);
@@ -42,7 +43,7 @@ app.get("/error/:code", (req, res) => {
 app.use("/public", express.static(path.join(__dirname, "web", "public")));
 
 app.use((req, res) => {
-  console.warn(`[404] Route not found: ${req.originalUrl}`);
+  warn("Route not found: {url}", "404", { url: req.originalUrl });
   res.redirect("/error/404");
 });
 
@@ -51,7 +52,7 @@ await dbase.initializeDatabase();
 initializeSocket(server);
 
 if (process.argv.includes("resetData")) {
-  console.log("[DB] Resetting app data...");
+  log("info", "Resetting app data...", "DB");
   await dbase.resetApp(config.gameUrl);
 }
 
@@ -59,12 +60,10 @@ const db = dbase.getDatabase();
 const hostId = db.data.players[0]?.id;
 
 server.listen(port, () => {
-  console.log(`[Server] Server listening on http://localhost:${port}`);
+  log("info", "Server listening on http://localhost:{port}", "Server", { port });
   if (hostId) {
-    console.log(
-      `[Server] Controller available at ${config.gameUrl}/controller?id=${hostId}`,
-    );
+    log("info", "Controller available at {url}/controller?id={hostId}", "Server", { url: config.gameUrl, hostId });
   } else {
-    console.warn("[Server] Could not get the host ID.");
+    warn("Could not get the host ID.", "Server");
   }
 });
