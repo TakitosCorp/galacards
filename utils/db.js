@@ -1,9 +1,10 @@
 import path from "path";
 import { fileURLToPath } from "url";
-import { JSONFilePreset } from "lowdb/node";
+import { Low } from "lowdb";
 import fs from "fs";
 import { customAlphabet } from "nanoid";
 import { error, warn, debug } from "./logger.js";
+import { AtomicJSONFile } from "./dbAdapter.js";
 
 // Configuration and constants section
 
@@ -32,30 +33,8 @@ const defaultData = {
 };
 let db;
 
-// Safe DB write with error handling and retry
-async function safeDbWrite(retries = 3, delayMs = 100) {
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      await db.write();
-      return;
-    } catch (err) {
-      if (err.code === "EPERM" && attempt < retries) {
-        warn("EPERM error on write, retrying ({attempt}/{retries})...", "DB", {
-          attempt,
-          retries,
-        });
-        await new Promise((res) => setTimeout(res, delayMs));
-        continue;
-      }
-      error(
-        "Critical write error: {error}",
-        "DB",
-        { error: err.message },
-        { error: err },
-      );
-      throw err;
-    }
-  }
+async function safeDbWrite() {
+  await db.write();
 }
 
 // Create a custom nanoid with letters and numbers
@@ -68,7 +47,12 @@ const nanoid = customAlphabet(
 
 // Initialize the database
 export async function initializeDatabase() {
-  db = await JSONFilePreset(dbFile, defaultData);
+  const adapter = new AtomicJSONFile(dbFile);
+  db = new Low(adapter, defaultData);
+  await db.read();
+  if (db.data === defaultData) {
+    await db.write();
+  }
 }
 
 // Get the database instance

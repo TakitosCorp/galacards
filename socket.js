@@ -9,7 +9,6 @@ const config = JSON.parse(data);
 
 // Socket Initialization
 async function initializeSocket(server) {
-  await dbase.initializeDatabase();
   const io = new Server(server);
 
   io.use(authenticateSocket);

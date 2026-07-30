@@ -9,6 +9,9 @@ import * as dbase from "./utils/db.js";
 import { readFile } from "fs/promises";
 import { log, warn } from "./utils/logger.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const configDir = path.join(__dirname, "config");
 if (!fs.existsSync(configDir)) {
   fs.mkdirSync(configDir);
@@ -38,9 +41,6 @@ if (!fs.existsSync(configPath)) {
 
 const data = await readFile(configPath, "utf-8");
 const config = JSON.parse(data);
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const dataDir = path.join(__dirname, "data");
 if (!fs.existsSync(dataDir)) {
