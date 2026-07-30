@@ -13,13 +13,14 @@ async function initializeSocket(server) {
 
   io.use(authenticateSocket);
   io.on("connection", async (socket) => {
-    info("Authenticated client. Auth ID: {playerId}", {
+    info("Authenticated client: {playerId}", "Socket", {
       playerId: socket.playerId,
     });
 
     handleConnection(socket, io, "connect").catch((err) =>
       error(
         "Connection handler failed: {error}",
+        "Socket",
         { error: err.message },
         { error: err, playerId: socket.playerId },
       ),
@@ -34,7 +35,7 @@ function authenticateSocket(socket, next) {
   let playerId = socket.handshake.auth.id;
 
   if (!playerId) {
-    info("Disconnecting: missing authentication ID");
+    info("Disconnecting: missing authentication ID", "Auth");
     socket.disconnect(true);
     return;
   }
@@ -48,7 +49,9 @@ function authenticateSocket(socket, next) {
   const db = dbase.getDatabase();
   const player = db.data.players.find((p) => p.id === playerId);
   if (!player) {
-    info("Disconnecting: invalid authentication ID ({playerId})", { playerId });
+    info("Disconnecting: invalid authentication ID ({playerId})", "Auth", {
+      playerId,
+    });
     socket.disconnect(true);
     return;
   }
@@ -121,7 +124,7 @@ async function registerSocketHandlers(socket, io) {
   });
 
   socket.on("disconnect", async () => {
-    info("Disconnected client. Auth ID: {playerId}", {
+    info("Disconnected client: {playerId}", "Socket", {
       playerId: socket.playerId,
     });
     await handleConnection(socket, io, "disconnect");
@@ -262,6 +265,7 @@ async function handleConnection(socket, io, type) {
       }).catch((err) =>
         error(
           "Discord webhook failed (connect): {error}",
+          "Discord",
           { error: err.message },
           { error: err, playerId: socket.playerId },
         ),
@@ -275,6 +279,7 @@ async function handleConnection(socket, io, type) {
       }).catch((err) =>
         error(
           "Discord webhook failed (disconnect): {error}",
+          "Discord",
           { error: err.message },
           { error: err, playerId: socket.playerId },
         ),

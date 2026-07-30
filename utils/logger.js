@@ -11,6 +11,12 @@ function interpolate(msg, meta) {
   );
 }
 
+// Short time format for console (HH:MM:SS)
+function shortTime(timestamp) {
+  const d = new Date(timestamp);
+  return d.toLocaleTimeString("en-GB", { hour12: false });
+}
+
 // Load config
 const configData = await readFile("./config/config.json", "utf-8");
 const config = JSON.parse(configData);
@@ -21,7 +27,6 @@ const logger = winston.createLogger({
   format: winston.format.combine(
     winston.format.errors({ stack: true }),
     winston.format.timestamp(),
-    winston.format.json(),
   ),
   defaultMeta: {
     service: "galacards",
@@ -37,26 +42,16 @@ const logger = winston.createLogger({
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.printf(
-          ({
-            timestamp,
-            level,
-            message,
-            tag,
-            service,
-            environment,
-            hostname,
-            pid,
-            nodeVersion,
-            platform,
-            ...meta
-          }) => {
-            // Interpolate for human-readable console (SEQ gets raw template + structured properties)
+          ({ timestamp, level, message, tag, service, environment, hostname, pid, nodeVersion, platform, ...meta }) => {
             const rendered = interpolate(message, meta);
-            const infoBlock = `[${environment}|${hostname}|${service}]`;
-            const tagBlock = tag ? ` [${tag}]` : "";
+            meta = Object.fromEntries(
+              Object.entries(meta).filter(
+                ([k]) => !message.includes(`{${k}}`),
+              ),
+            );
             const metaStr =
-              Object.keys(meta).length > 1 ? ` ${JSON.stringify(meta)}` : "";
-            return `${timestamp} [${level}] ${infoBlock}${tagBlock} ${rendered}${metaStr}`.trim();
+              Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : "";
+            return `${shortTime(timestamp)} [${level}] ${rendered}${metaStr}`;
           },
         ),
       ),
