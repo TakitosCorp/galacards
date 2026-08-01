@@ -7,7 +7,10 @@ import { info, error } from "./utils/logger.js";
 const data = await readFile("./config/config.json", "utf-8");
 const config = JSON.parse(data);
 
-// Socket Initialization
+/**
+ * Attaches Socket.IO to the HTTP server and registers auth + handlers.
+ * @param {import("http").Server} server
+ */
 async function initializeSocket(server) {
   const io = new Server(server);
 
@@ -30,7 +33,11 @@ async function initializeSocket(server) {
   });
 }
 
-// Authentication Middleware
+/**
+ * Rejects connections that lack a valid player ID or "obs".
+ * @param {import("socket.io").Socket} socket
+ * @param {Function} next
+ */
 function authenticateSocket(socket, next) {
   let playerId = socket.handshake.auth.id;
 
@@ -60,8 +67,11 @@ function authenticateSocket(socket, next) {
   next();
 }
 
-// Socket event registration
-// For all returns, returnX will be used
+/**
+ * Wires all `namespace:action` event listeners for a single socket.
+ * @param {import("socket.io").Socket} socket
+ * @param {import("socket.io").Server} io
+ */
 async function registerSocketHandlers(socket, io) {
   const playerId = socket.playerId;
 
@@ -131,8 +141,10 @@ async function registerSocketHandlers(socket, io) {
   });
 }
 
-// Socket helper functions
-
+/**
+ * Sends the full game snapshot (players + game + presentation) to a client.
+ * @param {import("socket.io").Socket} socket
+ */
 async function sendGeneralData(socket) {
   var data = await dbase.getDatabase();
   const currentPlayerPosition = await dbase.getCurrentPlayer();
@@ -147,18 +159,32 @@ async function sendGeneralData(socket) {
   });
 }
 
+/**
+ * Emits the raw game state to a socket.
+ * @param {import("socket.io").Socket} socket
+ */
 async function sendGameData(socket) {
   const db = dbase.getDatabase();
   const gameData = db.data.game;
   socket.emit("game:returnGameData", gameData);
 }
 
+/**
+ * Emits player VDO/game links to the requesting client.
+ * @param {import("socket.io").Socket} socket
+ */
 async function sendLinks(socket) {
   const db = dbase.getDatabase();
   const players = db.data.players;
   socket.emit("player:returnLinks", { players: players });
 }
 
+/**
+ * Broadcasts player data, with an optional VDO refresh and name-change flag.
+ * @param {import("socket.io").Socket} socket
+ * @param {boolean} updateVdo
+ * @param {boolean} isNameChange
+ */
 async function getAllPlayersData(socket, updateVdo, isNameChange) {
   const db = dbase.getDatabase();
   const players = db.data.players;
@@ -175,6 +201,10 @@ async function getAllPlayersData(socket, updateVdo, isNameChange) {
   }
 }
 
+/**
+ * Resets images/scores and re-emits game state to all clients.
+ * @param {import("socket.io").Socket} socket
+ */
 async function resetGameData(socket) {
   await dbase.generateGameData();
   sendGameData(socket);
@@ -185,6 +215,10 @@ async function resetGameData(socket) {
   }
 }
 
+/**
+ * Picks 4 random images, updates state, and emits spin animation data.
+ * @param {import("socket.io").Socket} socket
+ */
 async function gameSpin(socket) {
   await dbase.resetAfterSpin();
   const data = await dbase.getGameState();
@@ -230,12 +264,23 @@ async function gameSpin(socket) {
   });
 }
 
+/**
+ * Updates a player name and broadcasts the change.
+ * @param {import("socket.io").Socket} socket
+ * @param {string} playerId
+ * @param {{ name: string }} name
+ */
 async function handleNameChange(socket, playerId, name) {
   await dbase.updatePlayerName(playerId, name.name).then(async () => {
     await getAllPlayersData(socket, false, true);
   });
 }
 
+/**
+ * Records a score assignment and echoes the updated score back.
+ * @param {{ playerIdFunc: string }} data
+ * @param {import("socket.io").Socket} socket
+ */
 async function handleScoreAddition(data, socket) {
   const playerId = data.playerIdFunc;
   await dbase.addScore(playerId);
@@ -243,14 +288,23 @@ async function handleScoreAddition(data, socket) {
   socket.emit("game:returnScore", { playerId: playerId, score: score });
 }
 
-// General helper functions
+/**
+ * Returns `count` unique random images from the remaining pool.
+ * @param {string[]} remainingImages
+ * @param {number} count
+ * @returns {string[]}
+ */
 function getRandomImages(remainingImages, count) {
   const shuffled = remainingImages.sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }
 
-// Connection and disconnection functions
-
+/**
+ * Sends a Discord webhook on connect or disconnect.
+ * @param {import("socket.io").Socket} socket
+ * @param {import("socket.io").Server} io
+ * @param {"connect"|"disconnect"} type
+ */
 async function handleConnection(socket, io, type) {
   const players = await dbase.getAllPlayers();
   if (socket.playerId !== "obs" && socket.playerId !== players[0].id) {

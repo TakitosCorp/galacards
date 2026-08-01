@@ -1,5 +1,9 @@
-// Alerts used in the controller
-
+/**
+ * Shows a confirmation dialog before awarding points to a player.
+ * @param {string} playerId
+ * @param {string} playerName
+ * @param {number} points - 1 or 0.5
+ */
 function confirmPointsAssignment(playerId, playerName, points) {
   const pointText = points === 1 ? "point" : "points";
 
@@ -29,6 +33,10 @@ function confirmPointsAssignment(playerId, playerName, points) {
   });
 }
 
+/**
+ * Shows a dialog with each player's VDO/game link and a copy button.
+ * @param {Array<{ id: string, name: string, playerUrl?: string, vdoUrl: string }>} players
+ */
 function displayPlayerLinks(players) {
   const contentHtml = players
     .map((player) => {
@@ -84,8 +92,10 @@ function displayPlayerLinks(players) {
   });
 }
 
-// Alerts used generally
-
+/**
+ * Prompts a newly connected player to set a display name.
+ * @param {object} socket
+ */
 function promptForUsername(socket) {
   Swal.fire({
     title: "Enter your name :D",
@@ -129,6 +139,9 @@ function promptForUsername(socket) {
   });
 }
 
+/**
+ * Shows a full-width Streamable video embed in a modal.
+ */
 function displayVideoEmbed() {
   Swal.fire({
     title: "Watch this video",

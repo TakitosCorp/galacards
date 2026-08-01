@@ -3,25 +3,66 @@ import { SeqTransport } from "@datalust/winston-seq";
 import { readFile } from "fs/promises";
 import os from "os";
 
-// Lightweight interpolation for console display only
-// SEQ receives the raw template + properties for structured rendering
+/**
+ * Lightweight interpolation for console display
+ * SEQ receives timestamps for structured rendering
+ */
 function interpolate(msg, meta) {
   return msg.replace(/\{(\w+)\}/g, (_, k) =>
     meta[k] !== undefined ? String(meta[k]) : `{${k}}`,
   );
 }
 
-// Short time format for console (HH:MM:SS)
+/**
+ * Short time format for console (HH:MM:SS)
+ */
 function shortTime(timestamp) {
   const d = new Date(timestamp);
   return d.toLocaleTimeString("en-GB", { hour12: false });
 }
 
-// Load config
 const configData = await readFile("./config/config.json", "utf-8");
 const config = JSON.parse(configData);
 
-// Winston logger instance (singleton)
+let seqFailureCount = 0;
+let seqDisabled = false;
+let seqLastErrorLog = 0;
+const SEQ_MAX_FAILURES = 5;
+const SEQ_ERROR_LOG_INTERVAL = 60_000;
+
+/**
+ * Handle SEQ transport errors
+ * Disables transport after repeated failures to prevent spam
+ */
+function handleSeqError(e) {
+  seqFailureCount++;
+  const code = e?.cause?.code || e?.code || "UNKNOWN";
+
+  if (code === "ECONNREFUSED" && seqFailureCount >= SEQ_MAX_FAILURES) {
+    if (!seqDisabled) {
+      seqDisabled = true;
+      console.warn(
+        `[SEQ] Server unreachable after ${SEQ_MAX_FAILURES} attempts — SEQ transport removed`,
+      );
+      if (seqTransport) logger.remove(seqTransport);
+    }
+    return;
+  }
+
+  const now = Date.now();
+  if (now - seqLastErrorLog < SEQ_ERROR_LOG_INTERVAL) return;
+  seqLastErrorLog = now;
+
+  const short =
+    code === "ECONNREFUSED"
+      ? `connection refused (${seqFailureCount}/${SEQ_MAX_FAILURES})`
+      : e?.message || String(e);
+  console.error(`[SEQ Transport Error] ${short}`);
+}
+
+/**
+ * Winston logger instance (singleton)
+ */
 const logger = winston.createLogger({
   level: config.logging?.level || "debug",
   format: winston.format.combine(
@@ -37,7 +78,6 @@ const logger = winston.createLogger({
     platform: process.platform,
   },
   transports: [
-    // Console transport (always on, for local dev)
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
@@ -56,25 +96,24 @@ const logger = winston.createLogger({
             ...meta
           }) => {
             const rendered = interpolate(message, meta);
-            meta = Object.fromEntries(
+            const filteredMeta = Object.fromEntries(
               Object.entries(meta).filter(([k]) => !message.includes(`{${k}}`)),
             );
             const metaStr =
-              Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : "";
+              Object.keys(filteredMeta).length > 0
+                ? ` ${JSON.stringify(filteredMeta)}`
+                : "";
             return `${shortTime(timestamp)} [${level}] ${rendered}${metaStr}`;
           },
         ),
       ),
     }),
-    // SEQ transport (conditional)
     ...(config.seq?.enabled
       ? [
           new SeqTransport({
             serverUrl: config.seq.serverUrl,
             apiKey: config.seq.apiKey || undefined,
-            onError: (e) => {
-              console.error("[SEQ Transport Error]", e);
-            },
+            onError: handleSeqError,
             handleExceptions: true,
             handleRejections: true,
           }),
@@ -83,18 +122,19 @@ const logger = winston.createLogger({
   ],
 });
 
-// Generic log function
-// message supports {placeholder} syntax — e.g. "Hello {name}"
-// prefix is an optional tag rendered as [prefix] on console and stored as `tag` in SEQ
-// params provides values for interpolation AND becomes structured properties in SEQ
-// context is additional structured metadata merged into the event
+/**
+ * Generic log function
+ * message: supports {placeholder} syntax for interpolation
+ * prefix: optional tag rendered as [tag] in console and SEQ
+ * params: values for interpolation, structured properties in SEQ
+ * context: additional structured metadata merged into the event
+ */
 export function log(level, message, prefix = "", params = {}, context = {}) {
   const taggedMsg = prefix ? `[${prefix}] ${message}` : message;
   const enriched = prefix ? { ...context, tag: prefix } : context;
   logger.log(level, taggedMsg, { ...params, ...enriched });
 }
 
-// Level-specific functions
 export function error(message, prefix = "", params = {}, context = {}) {
   log("error", message, prefix, params, context);
 }
@@ -111,7 +151,9 @@ export function debug(message, prefix = "", params = {}, context = {}) {
   log("debug", message, prefix, params, context);
 }
 
-// Convenience: create a tagged logger that prefixes messages with [Tag]
+/**
+ * Create a tagged logger that prefixes messages automatically
+ */
 export function createTaggedLogger(tag) {
   return {
     log: (level, message, params, context) =>

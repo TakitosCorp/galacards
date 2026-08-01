@@ -6,8 +6,6 @@ import { customAlphabet } from "nanoid";
 import { error, warn, debug } from "./logger.js";
 import { AtomicJSONFile } from "./dbAdapter.js";
 
-// Configuration and constants section
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -33,6 +31,10 @@ const defaultData = {
 };
 let db;
 
+/**
+ * Writes the current database state to disk.
+ * Plain pass-through to handle exceptions at call sites if needed.
+ */
 async function safeDbWrite() {
   await db.write();
 }
@@ -43,9 +45,10 @@ const nanoid = customAlphabet(
   8,
 );
 
-// Database basics section
-
-// Initialize the database
+/**
+ * Reads the JSON database file and initializes the LowDB singleton.
+ * Must be called before {@link getDatabase}.
+ */
 export async function initializeDatabase() {
   const adapter = new AtomicJSONFile(dbFile);
   db = new Low(adapter, defaultData);
@@ -55,20 +58,27 @@ export async function initializeDatabase() {
   }
 }
 
-// Get the database instance
+/**
+ * Returns the initialized LowDB singleton instance.
+ * @returns {import("lowdb").Low<typeof defaultData>} The database.
+ */
 export function getDatabase() {
   return db;
 }
 
-// Database setup and reset section
-
-// Function to reset the entire game
+/**
+ * Resets the entire game state (images, players, scores).
+ * @param {string} gameBaseUrl - Base URL used to build player links.
+ */
 export async function resetApp(gameBaseUrl) {
   await generateGameData();
   await generatePlayerData(gameBaseUrl);
 }
 
-// Function to generate player data
+/**
+ * Creates the host (index 0) and 4 player entries in the database.
+ * @param {string} gameBaseUrl - Base URL for player page links.
+ */
 async function generatePlayerData(gameBaseUrl) {
   db.data.players = [];
   const hostId = nanoid();
@@ -95,8 +105,10 @@ async function generatePlayerData(gameBaseUrl) {
   await safeDbWrite();
 }
 
-// Function to generate game data
-// This will also be used to restart the game
+/**
+ * Scans the images directory, resets game state for a fresh round,
+ * and sets totalRounds to imageCount / 4.
+ */
 export async function generateGameData() {
   try {
     const files = await fs.promises.readdir(imageDir);
@@ -128,14 +140,20 @@ export async function generateGameData() {
   }
 }
 
+/**
+ * Clears currentPlayer and assignedScores after a spin completes.
+ */
 export async function resetAfterSpin() {
   db.data.game.currentPlayer = null;
   db.data.game.assignedScores = [];
   await safeDbWrite();
 }
 
-// Player management section
-
+/**
+ * Returns a single player by ID.
+ * @param {string} playerId
+ * @returns {{ id: string, name: string, score?: number, playerUrl?: string, vdoUrl?: string }}
+ */
 export async function getPlayerInfo(playerId) {
   const player = db.data.players.find((p) => p.id === playerId);
   if (!player) {
@@ -144,10 +162,19 @@ export async function getPlayerInfo(playerId) {
   return player;
 }
 
+/**
+ * Returns all players (host + 4), or an empty array if none exist.
+ * @returns {Array<{ id: string, name: string }>}
+ */
 export async function getAllPlayers() {
   return db.data.players || [];
 }
 
+/**
+ * Updates a player's display name and persists to disk.
+ * @param {string} playerId
+ * @param {string} name - New display name.
+ */
 export async function updatePlayerName(playerId, name) {
   debug("Updating player name: {playerId} -> {name}", "DB", { playerId, name });
   const player = db.data.players.find((p) => p.id === playerId);
@@ -167,22 +194,35 @@ export async function updatePlayerName(playerId, name) {
   }
 }
 
-// Game management section
-
+/**
+ * Returns the full game state object.
+ * @returns {typeof defaultData["game"]}
+ */
 export async function getGameState() {
   return db.data.game || {};
 }
 
+/**
+ * Sets the top-level gameState string (e.g. "waiting", "playing").
+ * @param {string} newState
+ */
 export async function updateGameState(newState) {
   db.data.game.gameState = newState;
   await safeDbWrite();
 }
 
+/**
+ * Replaces the selected images for the current round.
+ * @param {string[]} selectedImages
+ */
 export async function updateSelectedImages(selectedImages) {
   db.data.game.selectedImages = selectedImages;
   await safeDbWrite();
 }
 
+/**
+ * Removes already-selected images from the remaining pool.
+ */
 export async function updateRemainingImages() {
   db.data.game.remainingImages = db.data.game.remainingImages.filter(
     (img) => !db.data.game.selectedImages.includes(img),
@@ -190,13 +230,19 @@ export async function updateRemainingImages() {
   await safeDbWrite();
 }
 
+/**
+ * Increments the current round counter by 1.
+ */
 export async function updateCurrentRound() {
   db.data.game.currentRound += 1;
   await safeDbWrite();
 }
 
-// Scores management section
-
+/**
+ * Awards points to a player or records a provisional "0" (host) entry.
+ * First caller gets +1, second caller gets +0.5. Max 2 entries per spin.
+ * @param {string} playerId - "0" for host provisional, else a player ID.
+ */
 export async function addScore(playerId) {
   if (playerId === "0") {
     const actualScores = db.data.game.assignedScores || [];
@@ -227,11 +273,20 @@ export async function addScore(playerId) {
   await safeDbWrite();
 }
 
+/**
+ * Returns the current score for a player (0 if not found).
+ * @param {string} playerId
+ * @returns {number}
+ */
 export async function getPlayerScore(playerId) {
   const player = db.data.players.find((p) => p.id === playerId);
   return player ? player.score : 0;
 }
 
+/**
+ * Resets every player's score to the given value.
+ * @param {number} score
+ */
 export async function setAllPlayerScores(score) {
   for (const player of db.data.players) {
     player.score = score;
@@ -239,6 +294,10 @@ export async function setAllPlayerScores(score) {
   await safeDbWrite();
 }
 
+/**
+ * Returns an array of { id, score } for all players.
+ * @returns {Array<{ id: string, score: number }>}
+ */
 export async function getAllPlayerScores() {
   return db.data.players.map(({ id, score }) => ({
     id,
@@ -246,12 +305,18 @@ export async function getAllPlayerScores() {
   }));
 }
 
+/**
+ * Returns the provisional score entries for the current spin.
+ * @returns {string[]} Array of player IDs (or "0" for host).
+ */
 export async function getAssignedScores() {
   return db.data.game.assignedScores || [];
 }
 
-// Turns management section
-
+/**
+ * Returns the 1-based player index of the current turn, or null.
+ * @returns {number|null}
+ */
 export async function getCurrentPlayer() {
   const players = db.data.players.slice(1, 5);
   const currentPlayerId = db.data.game.currentPlayer;
@@ -264,6 +329,9 @@ export async function getCurrentPlayer() {
   return currentIndex !== -1 ? currentIndex + 1 : null;
 }
 
+/**
+ * Advances currentPlayer to the next player, or null if the round is done.
+ */
 export async function setCurrentPlayer() {
   const players = db.data.players.slice(1, 5);
   const currentPlayer = db.data.game.currentPlayer;
@@ -282,8 +350,10 @@ export async function setCurrentPlayer() {
   await safeDbWrite();
 }
 
-// Presentations management section
-
+/**
+ * Resets presentation state to inactive (stage 0).
+ * @returns {typeof defaultData["game"]["presentation"]}
+ */
 export async function resetPresentation() {
   debug("Restarting presentation on the server", "DB");
   if (!db.data.game.presentation) {
@@ -304,6 +374,10 @@ export async function resetPresentation() {
   return db.data.game.presentation;
 }
 
+/**
+ * Returns the current presentation state, initializing defaults if absent.
+ * @returns {{ active: boolean, currentPresenter: string|null, stage: number }}
+ */
 export async function getPresentation() {
   if (!db.data.game.presentation) {
     db.data.game.presentation = {
@@ -318,6 +392,11 @@ export async function getPresentation() {
   return db.data.game.presentation;
 }
 
+/**
+ * Advances the presentation stage (cycles 0→1→2→3→4→0).
+ * Stage 0 means all visible; stages 1-4 show a specific player + host.
+ * @returns {typeof defaultData["game"]["presentation"]}
+ */
 export async function nextPresenter() {
   if (!db.data.game.presentation) {
     db.data.game.presentation = {

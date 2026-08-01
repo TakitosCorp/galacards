@@ -1,5 +1,3 @@
-// Configuration and constants section
-
 const queryParams = new URLSearchParams(window.location.search);
 const playerId = queryParams.get("id");
 const isDevMode = queryParams.get("dev") === "true";
@@ -28,8 +26,6 @@ const turnButton = document.getElementById("turnButton");
 const avaliableCards = document.getElementById("avaliableCards");
 const currentRound = document.getElementById("roundNumber");
 const totalRounds = document.getElementById("totalRounds");
-
-// Initialization section
 
 window.onload = () => {
   document.getElementById("background-video").playbackRate = 0.5;
@@ -68,8 +64,6 @@ window.onload = () => {
     }
   });
 };
-
-// socket.io section
 
 const socket = io(window.location.host, {
   auth: { id: playerId },
@@ -125,8 +119,11 @@ socket.on("player:returnPlayerNameChange", (data) => {
   handlePlayerData(players, updateVdo, socket);
 });
 
-// Socket helper functions section
-
+/**
+ * Handles `general:returnData` — refreshes players, game state, and highlights.
+ * @param {{ players: Array, game: object }} data
+ * @param {object} socket
+ */
 function handleReturnedData(data, socket) {
   const game = data.game || {};
   const players = data.players || [];
@@ -165,6 +162,13 @@ function handleReturnedData(data, socket) {
   }
 }
 
+/**
+ * Renders host + players, updates VDO iframes, and shows the score overlay.
+ * Prompts players with default names to choose a display name.
+ * @param {Array} players
+ * @param {boolean} updateVdo
+ * @param {object} socket
+ */
 function handlePlayerData(players, updateVdo, socket) {
   // Handle host
   hostId = players[0].id;
@@ -219,6 +223,11 @@ function handlePlayerData(players, updateVdo, socket) {
   });
 }
 
+/**
+ * Renders selected card images. For the current player's own card, either
+ * reveals it immediately (if scores are assigned) or shows a delayed blur.
+ * @param {{ selectedImages: string[], remainingImages: number, currentRound: number, totalRounds: number, assignedScores: string[], currentPlayer: number|null }} game
+ */
 function handleGameData(game) {
   if (game.selectedImages) {
     const selectedImages = game.selectedImages;
@@ -323,8 +332,11 @@ function handleGameData(game) {
   }
 }
 
-// Game helper functions section
-
+/**
+ * Creates a styled card image element.
+ * @param {string} imageName
+ * @returns {HTMLImageElement}
+ */
 function createImageElement(imageName) {
   const img = document.createElement("img");
   img.src = `/public/images/${imageName}`;
@@ -333,6 +345,10 @@ function createImageElement(imageName) {
   return img;
 }
 
+/**
+ * Preloads all card images on page load. Failures are silenced — images are
+ * cached on first view.
+ */
 async function fetchImages() {
   try {
     const response = await fetch("/images");
@@ -343,6 +359,10 @@ async function fetchImages() {
   }
 }
 
+/**
+ * Creates hidden Image objects to warm the browser cache.
+ * @param {string[]} imageArray
+ */
 function preloadImages(imageArray) {
   imageArray.forEach((imageName) => {
     const img = new Image();
@@ -350,6 +370,12 @@ function preloadImages(imageArray) {
   });
 }
 
+/**
+ * Runs the slot-machine spin animation for each card, plays audio, and
+ * optionally reveals the current player's card name.
+ * @param {string[][]} spinData - 4 arrays of filler + final images per card.
+ * @param {string[]} selected - The 4 revealed image filenames.
+ */
 async function handleSpinData(spinData, selected) {
   const elementsWithEffects = document.querySelectorAll(
     ".shadow-glow, .scale-\\[1\\.04\\]",
@@ -410,6 +436,14 @@ async function handleSpinData(spinData, selected) {
   }
 }
 
+/**
+ * Animates one card reel. For the current player's card, the winning image
+ * is placed second-to-last so it stops just before the final reveal.
+ * @param {number} cardContainerNumber
+ * @param {HTMLElement} cardContainer
+ * @param {string[]} reelData
+ * @returns {Promise<void>}
+ */
 async function spinContainer(cardContainerNumber, cardContainer, reelData) {
   return new Promise((resolve) => {
     const initialImage = document.getElementById(
@@ -487,6 +521,12 @@ async function spinContainer(cardContainerNumber, cardContainer, reelData) {
   });
 }
 
+/**
+ * Fades all cards back to the generic "Can you guess who you are?" state.
+ */
+/**
+ * Fades all cards back to the generic "Can you guess who you are?" state.
+ */
 async function handleGameReset() {
   cardNames.forEach((name) => {
     name.classList.remove("blurCardName");
@@ -567,6 +607,10 @@ async function handleGameReset() {
   }
 }
 
+/**
+ * Highlights the active player's card and iframe.
+ * @param {number} playerId
+ */
 function applyStylesToCurrentPlayer(playerId) {
   const currentHighlightedElements = document.querySelectorAll(
     ".shadow-glow.scale-\\[1\\.04\\]",
@@ -591,10 +635,19 @@ function applyStylesToCurrentPlayer(playerId) {
   }
 }
 
+/**
+ * Handles `game:returnCurrentPlayer` by applying highlight styles.
+ * @param {{ playerId: number }} data
+ */
 function handleApplyCurrentRound(data) {
   applyStylesToCurrentPlayer(data.playerId);
 }
 
+/**
+ * Updates a score overlay, plays the sound, and triggers card reveal
+ * if the current player's scores are fully assigned.
+ * @param {{ playerId: string, score: number }} data
+ */
 function handleReturnedScore(data) {
   socket.emit("game:getAssignedScores");
 
@@ -646,7 +699,6 @@ function handleReturnedScore(data) {
         }
       }
     } else {
-      // Score element not found
     }
   });
 }

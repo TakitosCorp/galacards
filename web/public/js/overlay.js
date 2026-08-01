@@ -1,5 +1,3 @@
-// Configuration and constants section
-
 const queryParams = new URLSearchParams(window.location.search);
 const playerId = queryParams.get("id");
 const isDevMode = queryParams.get("dev") === "true";
@@ -28,14 +26,10 @@ const avaliableCards = document.getElementById("avaliableCards");
 const currentRound = document.getElementById("roundNumber");
 const totalRounds = document.getElementById("totalRounds");
 
-// Initialization section
-
 window.onload = () => {
   document.getElementById("background-video").playbackRate = 0.5;
   audio.loop = true;
 };
-
-// socket.io section
 
 const socket = io(window.location.host, {
   auth: { id: playerId },
@@ -91,8 +85,12 @@ socket.on("game:returnReset", async () => {
   handleGameReset();
 });
 
-// Socket helper functions section
-
+/**
+ * Handles `general:returnData` on the overlay — updates player and
+ * presentation highlight state.
+ * @param {{ players: Array, game: object }} data
+ * @param {object} socket
+ */
 function handleReturnedData(data, socket) {
   const game = data.game || {};
   const players = data.players || [];
@@ -131,6 +129,13 @@ function handleReturnedData(data, socket) {
   }
 }
 
+/**
+ * Updates player iframes and shows/hides the presentation control bar.
+ * Only the host sees the bar in presentation mode.
+ * @param {Array} players
+ * @param {boolean} updateVdo
+ * @param {object} socket
+ */
 function handlePlayerData(players, updateVdo, socket) {
   // Handle host
   hostId = players[0].id;
@@ -182,6 +187,10 @@ function handlePlayerData(players, updateVdo, socket) {
   });
 }
 
+/**
+ * Renders selected card images on the overlay.
+ * @param {{ selectedImages: string[], remainingImages: number, currentRound: number, totalRounds: number, assignedScores: string[], currentPlayer: number|null }} game
+ */
 function handleGameData(game) {
   if (game.selectedImages) {
     const selectedImages = game.selectedImages;
@@ -221,8 +230,11 @@ function handleGameData(game) {
   }
 }
 
-// Game helper functions section
-
+/**
+ * Creates a styled card image element.
+ * @param {string} imageName
+ * @returns {HTMLImageElement}
+ */
 function createImageElement(imageName) {
   const img = document.createElement("img");
   img.src = `/public/images/${imageName}`;
@@ -231,6 +243,10 @@ function createImageElement(imageName) {
   return img;
 }
 
+/**
+ * Preloads all card images on the overlay page.
+ * Failures are silenced — images are cached on first view.
+ */
 async function fetchImages() {
   try {
     const response = await fetch("/images");
@@ -241,6 +257,10 @@ async function fetchImages() {
   }
 }
 
+/**
+ * Creates hidden Image objects to warm the browser cache.
+ * @param {string[]} imageArray
+ */
 function preloadImages(imageArray) {
   imageArray.forEach((imageName) => {
     const img = new Image();
@@ -248,6 +268,11 @@ function preloadImages(imageArray) {
   });
 }
 
+/**
+ * Runs a simplified spin animation (blur + reveal) for overlay display.
+ * @param {string[][]} spinData
+ * @param {string[]} selected
+ */
 async function handleSpinData(spinData, selected) {
   const elementsWithEffects = document.querySelectorAll(
     ".shadow-glow, .scale-\\[1\\.04\\]",
@@ -306,6 +331,13 @@ async function handleSpinData(spinData, selected) {
   }
 }
 
+/**
+ * Animates a single card reel strip for the overlay.
+ * @param {number} cardContainerNumber
+ * @param {HTMLElement} cardContainer
+ * @param {string[]} reelData
+ * @returns {Promise<void>}
+ */
 async function spinContainer(cardContainerNumber, cardContainer, reelData) {
   return new Promise((resolve) => {
     const initialImage = document.getElementById(
@@ -376,6 +408,9 @@ async function spinContainer(cardContainerNumber, cardContainer, reelData) {
   });
 }
 
+/**
+ * Fades all cards back to the generic "Can you guess who you are?" state.
+ */
 async function handleGameReset() {
   for (const name of cardNames) {
     await new Promise((resolve) => setTimeout(resolve, 400));
@@ -451,6 +486,10 @@ async function handleGameReset() {
   }
 }
 
+/**
+ * Highlights the active presenter's iframe.
+ * @param {number} playerId
+ */
 function applyStylesToCurrentPlayer(playerId) {
   const currentHighlightedElements = document.querySelectorAll(
     ".shadow-glow.scale-\\[1\\.04\\]",
@@ -475,10 +514,18 @@ function applyStylesToCurrentPlayer(playerId) {
   }
 }
 
+/**
+ * Highlights the active presenter's iframe.
+ * @param {{ playerId: number }} data
+ */
 function handleApplyCurrentRound(data) {
   applyStylesToCurrentPlayer(data.playerId);
 }
 
+/**
+ * Updates a score overlay and plays the points sound.
+ * @param {{ playerId: string, score: number }} data
+ */
 function handleReturnedScore(data) {
   const { playerId, score } = data;
   if (playerId !== "0") {
@@ -496,7 +543,6 @@ function handleReturnedScore(data) {
         scoreElement.classList.remove("score-update");
       }, 500);
     } else {
-      // Score element not found
     }
   }
 }

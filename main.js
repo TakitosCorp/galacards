@@ -47,6 +47,10 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir);
 }
 
+/**
+ * Entry point: configures Express, mounts routes, initialises the database
+ * and Socket.IO, then starts listening.
+ */
 const app = express();
 const port = config.gamePort;
 

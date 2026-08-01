@@ -1,5 +1,3 @@
-// Configuration and constants section
-
 const queryParams = new URLSearchParams(window.location.search);
 const playerId = queryParams.get("id");
 const isDevMode = queryParams.get("dev") === "true";
@@ -12,8 +10,6 @@ const resetPresentationButton = document.getElementById(
 const nextPresentationButton = document.getElementById(
   "nextPresentationButton",
 );
-
-// Initialization section
 
 window.onload = () => {
   document.getElementById("background-video").playbackRate = 0.5;
@@ -36,8 +32,6 @@ window.onload = () => {
     if (nextPresentationButton) nextPresentationButton.style.display = "none";
   }
 };
-
-// socket.io section
 
 const socket = io(window.location.host, {
   auth: { id: playerId },
@@ -79,8 +73,12 @@ if (isPresentationMode) {
   });
 }
 
-// Socket helper functions section
-
+/**
+ * Handles `general:returnData` on the generic page — refreshes players
+ * and presentation highlight state.
+ * @param {{ players: Array, game: object }} data
+ * @param {object} socket
+ */
 function handleReturnedData(data, socket) {
   const players = data.players || [];
   const game = data.game || {};
@@ -106,6 +104,12 @@ function handleReturnedData(data, socket) {
   }
 }
 
+/**
+ * Updates player iframes and shows/hides the presentation control bar.
+ * @param {Array} players
+ * @param {boolean} updateVdo
+ * @param {object} socket
+ */
 function handlePlayerData(players, updateVdo, socket) {
   hostId = players[0].id;
   const hostIframe = document.getElementById("hostIframe");
@@ -146,10 +150,18 @@ function handlePlayerData(players, updateVdo, socket) {
   }
 }
 
+/**
+ * Highlights the active presenter's iframe.
+ * @param {{ playerId: number }} data
+ */
 function handleApplyCurrentRound(data) {
   applyStylesToCurrentPlayer(data.playerId);
 }
 
+/**
+ * Highlights the active presenter's iframe.
+ * @param {number} playerId
+ */
 function applyStylesToCurrentPlayer(playerId) {
   const currentHighlightedElements = document.querySelectorAll(
     ".shadow-glow.scale-\\[1\\.04\\]",
@@ -166,6 +178,9 @@ function applyStylesToCurrentPlayer(playerId) {
   }
 }
 
+/**
+ * Removes all glow/scale highlight classes from player iframes.
+ */
 function resetHighlightEffects() {
   const currentHighlightedElements = document.querySelectorAll(
     ".shadow-glow, .scale-\\[1\\.04\\]",
@@ -175,12 +190,17 @@ function resetHighlightEffects() {
   });
 }
 
+/**
+ * Adds glow + scale highlight to a DOM element.
+ * @param {HTMLElement} element
+ */
 function highlightElement(element) {
   element.classList.add("shadow-glow", "scale-[1.04]");
 }
 
-// Presentations functions section
-
+/**
+ * Resets all presentation effects and adds a focus class to every iframe.
+ */
 function handlePresentationReset() {
   resetHighlightEffects();
 
@@ -201,6 +221,10 @@ function handlePresentationReset() {
   }
 }
 
+/**
+ * Transitions to the next presentation stage and plays a sound.
+ * @param {{ active: boolean, currentPresenter: string|null }} data
+ */
 function handlePresentationNext(data) {
   resetHighlightEffects();
 
@@ -212,6 +236,10 @@ function handlePresentationNext(data) {
   updatePresentationViewFromServer(data);
 }
 
+/**
+ * Applies blur/focus CSS classes based on the presentation stage.
+ * @param {{ stage: number, active: boolean }} presentationData
+ */
 function updatePresentationViewFromServer(presentationData) {
   if (!isPresentationMode || !presentationData) return;
 
@@ -228,6 +256,9 @@ function updatePresentationViewFromServer(presentationData) {
   }
 }
 
+/**
+ * Strips all presentation CSS classes from every player and host iframe.
+ */
 function resetPresentationEffects() {
   for (let i = 1; i <= 4; i++) {
     const iframe = document.getElementById(`player${i}iframe`);
@@ -252,6 +283,10 @@ function resetPresentationEffects() {
   }
 }
 
+/**
+ * Sets player-focused / player-blurred classes based on presentation stage.
+ * @param {number} stage
+ */
 function applyPresentationEffects(stage) {
   const playerIframes = [];
   for (let i = 1; i <= 4; i++) {

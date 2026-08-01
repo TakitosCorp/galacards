@@ -14,6 +14,12 @@ const __dirname = path.dirname(__filename);
 
 const router = Router();
 
+/**
+ * Allows access if the query `id` matches any player or "obs".
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ */
 const isValidId = (req, res, next) => {
   const db = getDatabase();
   const players = db.data.players || [];
@@ -35,6 +41,12 @@ const isValidId = (req, res, next) => {
   return res.redirect("/error/401");
 };
 
+/**
+ * Allows access only to the host (player index 0).
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ */
 const isHost = (req, res, next) => {
   const db = getDatabase();
   const players = db.data.players || [];
@@ -56,6 +68,12 @@ const isHost = (req, res, next) => {
   return res.redirect("/error/403");
 };
 
+/**
+ * Allows access to the host or any registered player.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ */
 const isHostOrPlayer = (req, res, next) => {
   const db = getDatabase();
   const players = db.data.players || [];

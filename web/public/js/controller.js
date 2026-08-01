@@ -1,5 +1,3 @@
-// Configuration and constants section
-
 const queryParams = new URLSearchParams(window.location.search);
 const playerId = queryParams.get("id");
 const isDevMode = queryParams.get("dev") === "true";
@@ -28,14 +26,10 @@ const avaliableCards = document.getElementById("avaliableCards");
 const currentRound = document.getElementById("roundNumber");
 const totalRounds = document.getElementById("totalRounds");
 
-// Initialization section
-
 window.onload = () => {
   document.getElementById("background-video").playbackRate = 0.5;
   audio.loop = true;
 };
-
-// socket.io section
 
 const socket = io(window.location.host, {
   auth: { id: playerId },
@@ -99,8 +93,12 @@ socket.on("game:returnSpinButtonState", (data) => {
   updateSpinButtonState(data.game);
 });
 
-// Socket helper functions section
-
+/**
+ * Central handler for `general:returnData`. Refreshes players, game state,
+ * spin button label, and highlights the current player's card.
+ * @param {{ players: Array, game: object }} data
+ * @param {object} socket
+ */
 function handleReturnedData(data, socket) {
   const game = data.game || {};
   const players = data.players || [];
@@ -163,6 +161,13 @@ function handleReturnedData(data, socket) {
   }
 }
 
+/**
+ * Renders the host + player list, updates VDO iframe URLs, shows score
+ * overlays, and prompts default-name players to set a display name.
+ * @param {Array} players
+ * @param {boolean} updateVdo
+ * @param {object} socket
+ */
 function handlePlayerData(players, updateVdo, socket) {
   // Handle host
   hostId = players[0].id;
@@ -215,6 +220,10 @@ function handlePlayerData(players, updateVdo, socket) {
   });
 }
 
+/**
+ * Renders the 4 selected card images and updates round/remaining counters.
+ * @param {{ selectedImages: string[], remainingImages: number, currentRound: number, totalRounds: number, assignedScores: string[], currentPlayer: number|null }} game
+ */
 function handleGameData(game) {
   if (game.selectedImages) {
     if (game.assignedScores.length > 0) {
@@ -269,6 +278,11 @@ function handleGameData(game) {
   }
 }
 
+/**
+ * Sets the spin button text ("Spin!" / "Reveal!" / "Reset") and disabled state
+ * based on the current round and assignment status.
+ * @param {{ remainingImages: number, currentRound: number, totalRounds: number, currentPlayer: number|null, assignedScores: string[] }} game
+ */
 function updateSpinButtonState(game) {
   if (!game) return;
   if (
@@ -292,8 +306,11 @@ function updateSpinButtonState(game) {
   }
 }
 
-// Game helper functions section
-
+/**
+ * Creates a styled `<img>` element for a card image.
+ * @param {string} imageName - Filename from the images directory.
+ * @returns {HTMLImageElement}
+ */
 function createImageElement(imageName) {
   const img = document.createElement("img");
   img.src = `/public/images/${imageName}`;
@@ -302,6 +319,10 @@ function createImageElement(imageName) {
   return img;
 }
 
+/**
+ * Preloads all card images on page load. Failures are silenced — images are
+ * cached on first view.
+ */
 async function fetchImages() {
   try {
     const response = await fetch("/images");
@@ -312,6 +333,10 @@ async function fetchImages() {
   }
 }
 
+/**
+ * Creates hidden Image objects to warm the browser cache.
+ * @param {string[]} imageArray
+ */
 function preloadImages(imageArray) {
   imageArray.forEach((imageName) => {
     const img = new Image();
@@ -319,6 +344,15 @@ function preloadImages(imageArray) {
   });
 }
 
+/**
+ * Orchestrates the spin animation: blurs names, plays audio, animates each
+ * card reel with 16 filler images + the final reveal, then enables the turn button.
+ * @param {string[][]} spinData - 4 arrays of 16 filler + 1 final image per card.
+ * @param {string[]} selected - The 4 revealed image names.
+ * @param {boolean} hasMoreRounds
+ * @param {number} cRound
+ * @param {number} remainingImages
+ */
 async function handleSpinData(
   spinData,
   selected,
@@ -388,6 +422,13 @@ async function handleSpinData(
   turnButton.removeAttribute("disabled");
 }
 
+/**
+ * Animates a single card's reel strip from top to the reveal position.
+ * @param {number} cardContainerNumber - 0-based index into cardContainers.
+ * @param {HTMLElement} cardContainer
+ * @param {string[]} reelData - 17 image filenames (last = reveal).
+ * @returns {Promise<void>}
+ */
 async function spinContainer(cardContainerNumber, cardContainer, reelData) {
   return new Promise((resolve) => {
     const initialImage = document.getElementById(
@@ -458,6 +499,11 @@ async function spinContainer(cardContainerNumber, cardContainer, reelData) {
   });
 }
 
+/**
+ * Fades out all revealed cards back to the generic "Can you guess who you
+ * are?" state and resets button labels. Triggered when the game ends or the
+ * host clicks Reset.
+ */
 async function handleGameReset() {
   spinButton.setAttribute("disabled", true);
   turnButton.setAttribute("disabled", true);
@@ -539,6 +585,10 @@ async function handleGameReset() {
   spinButton.removeAttribute("disabled");
 }
 
+/**
+ * Highlights the active player's card and iframe with a glow + scale effect.
+ * @param {number} playerId - 1-based player index.
+ */
 function applyStylesToCurrentPlayer(playerId) {
   const currentHighlightedElements = document.querySelectorAll(
     ".shadow-glow.scale-\\[1\\.04\\]",
@@ -563,11 +613,13 @@ function applyStylesToCurrentPlayer(playerId) {
   }
 }
 
+/**
+ * Handles `game:returnCurrentPlayer` by applying highlight styles.
+ * @param {{ playerId: number }} data
+ */
 function handleApplyCurrentRound(data) {
   applyStylesToCurrentPlayer(data.playerId);
 }
-
-// Scores handling section
 
 document.querySelectorAll('[id^="player"]').forEach((container) => {
   if (container.id.includes("iframe")) {
@@ -610,6 +662,10 @@ document.querySelectorAll('[id^="player"]').forEach((container) => {
   }
 });
 
+/**
+ * Sends a score assignment to the server and refreshes spin button state.
+ * @param {string} playerIdFunc
+ */
 function sendScoreUpdate(playerIdFunc) {
   socket.emit("game:setAssignedScores", { playerIdFunc });
   socket.emit("game:getAssignedScores");
@@ -618,6 +674,10 @@ function sendScoreUpdate(playerIdFunc) {
   });
 }
 
+/**
+ * Updates a score element, plays the points sound, and refreshes spin state.
+ * @param {{ playerId: string, score: number }} data
+ */
 function handleReturnedScore(data) {
   spinButton.removeAttribute("disabled");
   const { playerId, score } = data;
@@ -636,8 +696,6 @@ function handleReturnedScore(data) {
   }
   socket.emit("game:getSpinButtonState");
 }
-
-// Button functions section
 
 document.getElementById("getPlayerLinks").addEventListener("click", () => {
   socket.emit("player:getLinks");

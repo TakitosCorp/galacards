@@ -2,17 +2,21 @@ import { readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { customAlphabet } from "nanoid";
 
-// Configuration and constants section
 const random = customAlphabet("abcdefghijklmnopqrstuvwxyz", 6);
 
+/**
+ * Creates a unique temporary filename in the same directory as the target.
+ * Used to achieve atomic writes that avoid EPERM races from antivirus/indexing locks.
+ *
+ * @param {string} filename - The target file path.
+ * @returns {string} A temp path with a random suffix.
+ */
 function getTempFilename(filename) {
   const ext = path.extname(filename);
   const base = path.basename(filename, ext);
   const dir = path.dirname(filename);
   return path.join(dir, `.${base}.${Date.now()}.${random()}.tmp`);
 }
-
-// Adapter section
 
 /**
  * Lowdb adapter that writes to a unique temp file per write then renames.

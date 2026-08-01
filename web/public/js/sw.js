@@ -12,9 +12,7 @@ self.addEventListener("install", (event) => {
         const cache = await caches.open(CACHE_NAME);
         return await cache.addAll(imageUrls);
       })
-      .catch((error) => {
-        // Image preload error - silently fail
-      }),
+      .catch((error) => {}),
   );
 });
 
@@ -48,9 +46,7 @@ self.addEventListener("fetch", (event) => {
             ) {
               const responseClone = networkResponse.clone();
               caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, responseClone).catch((error) => {
-                  // Cache put error - silently fail
-                });
+                cache.put(event.request, responseClone).catch((error) => {});
               });
             }
             return networkResponse;
