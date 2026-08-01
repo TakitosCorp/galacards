@@ -42,12 +42,22 @@ const logger = winston.createLogger({
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.printf(
-          ({ timestamp, level, message, tag, service, environment, hostname, pid, nodeVersion, platform, ...meta }) => {
+          ({
+            timestamp,
+            level,
+            message,
+            tag,
+            service,
+            environment,
+            hostname,
+            pid,
+            nodeVersion,
+            platform,
+            ...meta
+          }) => {
             const rendered = interpolate(message, meta);
             meta = Object.fromEntries(
-              Object.entries(meta).filter(
-                ([k]) => !message.includes(`{${k}}`),
-              ),
+              Object.entries(meta).filter(([k]) => !message.includes(`{${k}}`)),
             );
             const metaStr =
               Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : "";
