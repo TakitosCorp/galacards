@@ -7,6 +7,7 @@
     "start": "node main.js",
     "dev": "npx nodemon --ignore data main.js",
     "devReset": "npx nodemon --ignore data main.js resetData",
+    "dev:views": "powershell -ExecutionPolicy Bypass -File dev.ps1",
     "format": "prettier --write ."
   },
   "author": "AlexDeveloperUwU",
